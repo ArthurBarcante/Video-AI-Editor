@@ -1,0 +1,8 @@
+faster-whisper
+moviepy
+ffmpeg-python
+python-dotenv
+pydantic
+rich
+ruff
+pytest
