@@ -1,0 +1,52 @@
+from pathlib import Path
+
+
+ROOT_DIR = Path(__file__).resolve().parents[2]
+
+INPUT_DIR = ROOT_DIR / "input"
+OUTPUT_DIR = ROOT_DIR / "output"
+CACHE_DIR = ROOT_DIR / "cache"
+ASSETS_DIR = ROOT_DIR / "assets"
+
+OUTPUT_LONG_DIR = OUTPUT_DIR / "long"
+OUTPUT_SHORTS_DIR = OUTPUT_DIR / "shorts"
+OUTPUT_VERTICAL_DIR = OUTPUT_DIR / "vertical"
+OUTPUT_SUBTITLES_DIR = OUTPUT_DIR / "subtitles"
+
+CACHE_AUDIO_DIR = CACHE_DIR / "audio"
+CACHE_TRANSCRIPTS_DIR = CACHE_DIR / "transcripts"
+CACHE_HIGHLIGHTS_DIR = CACHE_DIR / "highlights"
+CACHE_EDIT_PLANS_DIR = CACHE_DIR / "edit_plans"
+
+ASSETS_SFX_DIR = ASSETS_DIR / "sfx"
+ASSETS_FONTS_DIR = ASSETS_DIR / "fonts"
+ASSETS_OVERLAYS_DIR = ASSETS_DIR / "overlays"
+
+DEFAULT_INPUT_VIDEO_PATH = INPUT_DIR / "live_bruta.mp4"
+
+DEFAULT_AUDIO_PATH = CACHE_AUDIO_DIR / "audio.wav"
+DEFAULT_TRANSCRIPT_PATH = CACHE_TRANSCRIPTS_DIR / "transcript.json"
+DEFAULT_SUBTITLES_SRT_PATH = CACHE_TRANSCRIPTS_DIR / "subtitles.srt"
+DEFAULT_SUBTITLES_ASS_PATH = CACHE_TRANSCRIPTS_DIR / "subtitles.ass"
+DEFAULT_HIGHLIGHTS_PATH = CACHE_HIGHLIGHTS_DIR / "highlights.json"
+DEFAULT_EDIT_PLAN_PATH = CACHE_EDIT_PLANS_DIR / "edit_plan.json"
+
+PROJECT_DIRS = [
+    INPUT_DIR,
+    OUTPUT_LONG_DIR,
+    OUTPUT_SHORTS_DIR,
+    OUTPUT_VERTICAL_DIR,
+    OUTPUT_SUBTITLES_DIR,
+    CACHE_AUDIO_DIR,
+    CACHE_TRANSCRIPTS_DIR,
+    CACHE_HIGHLIGHTS_DIR,
+    CACHE_EDIT_PLANS_DIR,
+    ASSETS_SFX_DIR,
+    ASSETS_FONTS_DIR,
+    ASSETS_OVERLAYS_DIR,
+]
+
+
+def ensure_project_dirs() -> None:
+    for directory in PROJECT_DIRS:
+        directory.mkdir(parents=True, exist_ok=True)

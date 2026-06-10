@@ -1,0 +1,10 @@
+{
+  "include": ["."],
+  "exclude": ["cache", "output", "input", "assets", "documentation", "tests", "__pycache__"],
+  "executionEnvironments": [
+    {
+      "root": ".",
+      "extraPaths": ["."]
+    }
+  ]
+}

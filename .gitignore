@@ -1,6 +1,128 @@
-.ruff_cache
-.vscode
-__pycache__
-tests
-.env.example
+# Python
+
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Ambiente virtual
+
 .venv/
+venv/
+env/
+
+# Variáveis de ambiente
+
+.env
+
+# VS Code local (opcional)
+
+.vscode/settings.json
+
+# Logs
+
+*.log
+
+# Arquivos temporários
+
+*.tmp
+*.temp
+
+# Sistema operacional
+
+.DS_Store
+Thumbs.db
+
+# Cache do projeto
+
+cache/*
+!cache/audio/
+!cache/transcripts/
+!cache/highlights/
+!cache/edit_plans/
+
+cache/audio/*
+cache/transcripts/*
+cache/highlights/*
+cache/edit_plans/*
+
+!cache/audio/.gitkeep
+!cache/transcripts/.gitkeep
+!cache/highlights/.gitkeep
+!cache/edit_plans/.gitkeep
+
+# Vídeos de entrada
+
+input/*.mp4
+input/*.mov
+input/*.mkv
+input/*.avi
+input/*.webm
+
+# Áudios intermediários
+
+*.wav
+*.mp3
+*.flac
+*.aac
+
+# Saídas geradas
+
+output/*
+!output/long/
+!output/shorts/
+!output/vertical/
+!output/subtitles/
+
+output/long/*
+output/shorts/*
+output/vertical/*
+output/subtitles/*
+
+!output/long/.gitkeep
+!output/shorts/.gitkeep
+!output/vertical/.gitkeep
+!output/subtitles/.gitkeep
+
+# Assets gerados automaticamente
+
+assets/generated/
+
+# Modelos locais (futuro)
+
+models/
+checkpoints/
+weights/
+
+# Testes
+
+.pytest_cache/
+
+# Ruff
+
+.ruff_cache/
+
+# Coverage
+
+.coverage
+htmlcov/
+
+# Jupyter
+
+.ipynb_checkpoints/
+
+# Build
+
+build/
+dist/
+*.egg-info/
+
+# Arquivos de renderização
+
+*.ass
+*.srt
+
+# Transcrições
+
+transcript.json
+highlights.json
+edit_plan.json

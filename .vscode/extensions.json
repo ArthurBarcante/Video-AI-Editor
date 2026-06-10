@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-python.black-formatter",
+    "eamodio.gitlens",
+    "github.copilot",
+    "github.copilot-chat",
+    "mikestead.dotenv",
+    "usernamehw.errorlens",
+    "davidanson.vscode-markdownlint"
+  ]
+}
