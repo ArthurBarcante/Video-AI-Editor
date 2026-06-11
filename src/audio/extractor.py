@@ -1,20 +1,14 @@
 from pathlib import Path
 
-from src.config.paths import CACHE_AUDIO_DIR, ROOT_DIR
+from src.config.paths import CACHE_AUDIO_DIR
 from src.rendering.ffmpeg_utils import (
     ensure_safe_project_output_path,
     run_ffmpeg_command,
 )
+from src.utils.file_utils import format_project_path
 from src.utils.logger import get_logger
 
 logger = get_logger(__name__)
-
-
-def format_project_path(path: Path) -> str:
-    try:
-        return str(path.relative_to(ROOT_DIR))
-    except ValueError:
-        return str(path)
 
 
 def extract_audio_from_video(

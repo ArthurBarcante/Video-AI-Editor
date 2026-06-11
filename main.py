@@ -1,11 +1,14 @@
 from pathlib import Path
 
-from src.audio.extractor import extract_audio_from_video, format_project_path
-from src.config.paths import CACHE_VIDEO_DIR, ensure_project_dirs
+from src.audio.extractor import extract_audio_from_video
+from src.config.paths import ensure_project_dirs
 from src.config.settings import APP_ENV, APP_NAME
+from src.subtitles.ass_generator import generate_ass
+from src.subtitles.srt_generator import generate_srt
+from src.transcription.whisper_transcriber import transcribe_audio
+from src.utils.file_utils import format_project_path
 from src.utils.logger import get_logger
-from src.video.converter import cut_video_segment
-from src.video.metadata import format_duration, get_video_metadata
+from src.video.metadata import get_video_metadata
 from src.video.reader import get_first_input_video
 from src.video.validator import validate_video_file
 
@@ -13,9 +16,10 @@ from src.video.validator import validate_video_file
 logger = get_logger(__name__)
 
 
-def run_phase_2_manual_test() -> None:
+def main() -> None:
     ensure_project_dirs()
 
+    logger.info("Sistema iniciando")
     logger.info("%s iniciado", APP_NAME)
     logger.info("Ambiente: %s", APP_ENV)
 
@@ -27,29 +31,23 @@ def run_phase_2_manual_test() -> None:
 
     metadata = get_video_metadata(validated_video)
     logger.info("Metadados carregados")
-    logger.info("Duração: %s", format_duration(metadata["duration"]))
-    logger.info("Resolução: %sx%s", metadata["width"], metadata["height"])
-    logger.info("Codec de vídeo: %s", metadata["video_codec"])
-    logger.info("Codec de áudio: %s", metadata["audio_codec"])
+    logger.info("Duração: %.2f segundos", metadata["duration"])
 
     audio_path = extract_audio_from_video(validated_video)
     logger.info("Áudio extraído: %s", format_project_path(audio_path))
+    logger.info("Validação Concluida")
 
-    sample_clip_path = CACHE_VIDEO_DIR / "sample_10s.mp4"
+    transcript_path = transcribe_audio(audio_path)
+    logger.info("Transcrição gerada: %s", format_project_path(transcript_path))
 
-    cut_video_segment(
-        input_path=validated_video,
-        output_path=sample_clip_path,
-        start="00:00:00",
-        end="00:00:10",
-    )
-    logger.info("Trecho de teste criado: %s", format_project_path(sample_clip_path))
+    srt_path = generate_srt(transcript_path)
+    logger.info("SRT gerado: %s", format_project_path(srt_path))
 
-    logger.info("Fase 2 concluída com sucesso")
+    ass_path = generate_ass(transcript_path)
+    logger.info("ASS gerado: %s", format_project_path(ass_path))
 
-
-def main() -> None:
-    run_phase_2_manual_test()
+    logger.info("Transcrição Concluida")
+    logger.info("Fase 3 concluída com sucesso")
 
 
 if __name__ == "__main__":
