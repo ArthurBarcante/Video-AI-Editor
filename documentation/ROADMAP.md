@@ -51,7 +51,7 @@ Projeto organizado, documentado e preparado para crescer.
 
 # Fase 2 — Processamento de Vídeo
 
-Status: Planejado
+Status: **Concluida**
 
 Objetivo:
 
@@ -59,11 +59,11 @@ Permitir leitura e manipulação de vídeos.
 
 ## Entregas
 
-* Leitura de arquivos MP4.
-* Extração de áudio.
-* Validação de vídeo.
-* Obtenção de metadados.
-* Conversões básicas com FFmpeg.
+* Leitura de arquivos MP4. (**Feito**)
+* Extração de áudio. (**Feito**)
+* Validação de vídeo. (**Feito**)
+* Obtenção de metadados. (**Feito**)
+* Conversões básicas com FFmpeg. (**Feito**)
 
 ## Resultado Esperado
 
