@@ -125,7 +125,7 @@ O sistema gera `cache/highlights/highlights.json` com candidatos a melhores mome
 
 # Fase 5 — Planejamento de Edição
 
-Status: **Planejado**
+Status: **Concluída**
 
 Objetivo:
 
@@ -133,15 +133,15 @@ Separar análise de renderização.
 
 ## Entregas
 
-* edit_plan.json. ()
-* Sistema de decisões. ()
-* Planejamento de shorts. ()
-* Planejamento de vídeos longos. ()
-* Priorização de highlights. ()
+* edit_plan.json. (**Feito**)
+* Sistema de decisões. (**Feito**)
+* Planejamento de shorts. (**Feito**)
+* Planejamento de vídeos longos. (**Feito**)
+* Priorização de highlights. (**Feito**)
 
 ## Resultado Esperado
 
-A IA decide o que editar antes da renderização.
+O sistema gera `cache/edit_plans/edit_plan.json` com shorts, vídeo longo planejado, segmentos priorizados e ações preparadas para renderização futura.
 
 ---
 

@@ -7,6 +7,7 @@ import pytest
 
 from src.config.paths import (
     CACHE_AUDIO_DIR,
+    CACHE_EDIT_PLANS_DIR,
     CACHE_HIGHLIGHTS_DIR,
     CACHE_TRANSCRIPTS_DIR,
     INPUT_DIR,
@@ -22,6 +23,7 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     audio_output = CACHE_AUDIO_DIR / "000_pytest_phase3.wav"
     transcript_output = CACHE_TRANSCRIPTS_DIR / "000_pytest_phase3_transcript.json"
     highlights_output = CACHE_HIGHLIGHTS_DIR / "highlights.json"
+    edit_plan_output = CACHE_EDIT_PLANS_DIR / "edit_plan.json"
     srt_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.srt"
     ass_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.ass"
 
@@ -35,7 +37,7 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "language": "pt",
             "duration": 1.0,
             "segments": [
-                {"start": 0.0, "end": 1.0, "text": "mano, não acredito nisso!"},
+                {"start": 0.0, "end": 3.0, "text": "mano, não acredito nisso!"},
             ],
         },
         transcript_output,
@@ -43,7 +45,11 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     previous_highlights = (
         highlights_output.read_text(encoding="utf-8") if highlights_output.exists() else None
     )
+    previous_edit_plan = (
+        edit_plan_output.read_text(encoding="utf-8") if edit_plan_output.exists() else None
+    )
     highlights_output.unlink(missing_ok=True)
+    edit_plan_output.unlink(missing_ok=True)
 
     try:
         result = subprocess.run(
@@ -71,8 +77,10 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Highlights gerados: 1",
             "Arquivo salvo em: cache/highlights/highlights.json",
             "Detecção de highlights concluída: cache/highlights/highlights.json",
+            "Edit plan gerado: cache/edit_plans/edit_plan.json",
+            "Edit plan pronto: cache/edit_plans/edit_plan.json",
             "Transcrição Concluida",
-            "Fase 4 concluída com sucesso",
+            "Fase 5 concluída com sucesso",
         ]
 
         positions = [logs.index(message) for message in expected_order]
@@ -86,7 +94,7 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         assert load_json(highlights_output) == [
             {
                 "start": 0.0,
-                "end": 1.0,
+                "end": 3.0,
                 "text": "mano, não acredito nisso!",
                 "score": 0.83,
                 "reasons": [
@@ -98,6 +106,69 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
                 ],
             }
         ]
+        assert load_json(edit_plan_output) == {
+            "source_video": "input/000_pytest_phase3.mp4",
+            "shorts": [
+                {
+                    "id": "short_01",
+                    "start": 0.0,
+                    "end": 15.0,
+                    "duration": 15.0,
+                    "score": 1.0,
+                    "title": "MANO, NÃO ACREDITO NISSO!",
+                    "reason": (
+                        "palavra-chave: mano, palavra-chave: não acredito, "
+                        "exclamação detectada, fala curta com potencial de corte, "
+                        "alta intensidade de áudio"
+                    ),
+                    "style": "intense",
+                    "actions": [
+                        {
+                            "type": "zoom",
+                            "start": 0.0,
+                            "end": 2.5,
+                            "time": None,
+                            "intensity": 1.2,
+                            "target": "center",
+                            "name": None,
+                            "style": None,
+                        },
+                        {
+                            "type": "subtitle_emphasis",
+                            "start": 0.0,
+                            "end": 3.0,
+                            "time": None,
+                            "intensity": None,
+                            "target": None,
+                            "name": None,
+                            "style": "impact",
+                        },
+                    ],
+                }
+            ],
+            "long_videos": [
+                {
+                    "id": "video_01",
+                    "title": "Melhores momentos da live",
+                    "duration_target": 1200,
+                    "theme": "compilado curto de melhores momentos",
+                    "segments": [
+                        {
+                            "start": 0.0,
+                            "end": 11.0,
+                            "duration": 11.0,
+                            "score": 0.83,
+                            "reason": (
+                                "palavra-chave: mano, palavra-chave: não acredito, "
+                                "exclamação detectada, fala curta com potencial de corte, "
+                                "alta intensidade de áudio"
+                            ),
+                        }
+                    ],
+                    "actions": [],
+                }
+            ],
+        }
     finally:
         input_video.unlink(missing_ok=True)
         audio_output.unlink(missing_ok=True)
@@ -108,3 +179,7 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             highlights_output.unlink(missing_ok=True)
         else:
             highlights_output.write_text(previous_highlights, encoding="utf-8")
+        if previous_edit_plan is None:
+            edit_plan_output.unlink(missing_ok=True)
+        else:
+            edit_plan_output.write_text(previous_edit_plan, encoding="utf-8")
