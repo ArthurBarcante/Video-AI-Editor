@@ -3,6 +3,7 @@ from pathlib import Path
 from src.audio.extractor import extract_audio_from_video
 from src.config.paths import ensure_project_dirs
 from src.config.settings import APP_ENV, APP_NAME
+from src.highlights.detector import detect_highlights
 from src.subtitles.ass_generator import generate_ass
 from src.subtitles.srt_generator import generate_srt
 from src.transcription.whisper_transcriber import transcribe_audio
@@ -46,8 +47,14 @@ def main() -> None:
     ass_path = generate_ass(transcript_path)
     logger.info("ASS gerado: %s", format_project_path(ass_path))
 
+    highlights_path = detect_highlights(
+        transcript_path=transcript_path,
+        audio_path=audio_path,
+    )
+    logger.info("Detecção de highlights concluída: %s", format_project_path(highlights_path))
+
     logger.info("Transcrição Concluida")
-    logger.info("Fase 3 concluída com sucesso")
+    logger.info("Fase 4 concluída com sucesso")
 
 
 if __name__ == "__main__":

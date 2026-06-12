@@ -31,9 +31,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 def generate_ass(
     transcript_path: str | Path,
     output_path: str | Path | None = None,
+    force: bool = False,
 ) -> Path:
     transcript_path = Path(transcript_path)
-    transcript = Transcript.model_validate(load_json(transcript_path))
 
     if output_path is None:
         output_path = OUTPUT_SUBTITLES_DIR / f"{transcript_path.stem}.ass"
@@ -41,6 +41,12 @@ def generate_ass(
     output_path = Path(output_path)
     ensure_safe_project_output_path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if output_path.exists() and not force:
+        logger.info("Legenda ASS já existe em cache: %s", format_project_path(output_path))
+        return output_path
+
+    transcript = Transcript.model_validate(load_json(transcript_path))
 
     events = []
 

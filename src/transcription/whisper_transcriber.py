@@ -2,7 +2,18 @@ from pathlib import Path
 from typing import Any
 
 from src.config.paths import CACHE_TRANSCRIPTS_DIR
-from src.config.settings import WHISPER_LANGUAGE, WHISPER_MODEL
+from src.config.settings import (
+    WHISPER_BEAM_SIZE,
+    WHISPER_BEST_OF,
+    WHISPER_COMPUTE_TYPE,
+    WHISPER_CONDITION_ON_PREVIOUS_TEXT,
+    WHISPER_CPU_THREADS,
+    WHISPER_DEVICE,
+    WHISPER_LANGUAGE,
+    WHISPER_MODEL,
+    WHISPER_NUM_WORKERS,
+    WHISPER_VAD_FILTER,
+)
 from src.rendering.ffmpeg_utils import ensure_safe_project_output_path
 from src.transcription.transcript_schema import Transcript, TranscriptSegment
 from src.utils.file_utils import format_project_path, save_json
@@ -64,16 +75,26 @@ def transcribe_audio(
     whisper_model_class = get_whisper_model_class()
     model = whisper_model_class(
         WHISPER_MODEL,
-        device="cpu",
-        compute_type="int8",
+        device=WHISPER_DEVICE,
+        compute_type=WHISPER_COMPUTE_TYPE,
+        cpu_threads=WHISPER_CPU_THREADS,
+        num_workers=WHISPER_NUM_WORKERS,
     )
 
-    logger.info("Transcrevendo áudio: %s", audio_path)
+    logger.info(
+        "Transcrevendo áudio: %s com beam_size=%s, vad_filter=%s",
+        format_project_path(audio_path),
+        WHISPER_BEAM_SIZE,
+        WHISPER_VAD_FILTER,
+    )
 
     segments, info = model.transcribe(
         str(audio_path),
         language=WHISPER_LANGUAGE,
-        vad_filter=True,
+        vad_filter=WHISPER_VAD_FILTER,
+        beam_size=WHISPER_BEAM_SIZE,
+        best_of=WHISPER_BEST_OF,
+        condition_on_previous_text=WHISPER_CONDITION_ON_PREVIOUS_TEXT,
     )
 
     transcript_segments = []

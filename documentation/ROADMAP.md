@@ -28,7 +28,7 @@ O objetivo final é que a IA execute tarefas normalmente realizadas por um edito
 
 # Fase 1 — Fundação
 
-Status: **Concluido**
+Status: **Concluída**
 Objetivo:
 
 Criar a base sólida do projeto.
@@ -45,13 +45,13 @@ Criar a base sólida do projeto.
 
 ## Resultado Esperado
 
-Projeto organizado, documentado e preparado para crescer.
+Projeto organizado, documentado, configurável e preparado para crescer com cache, logs e diretórios padronizados.
 
 ---
 
 # Fase 2 — Processamento de Vídeo
 
-Status: **Concluida**
+Status: **Concluída**
 
 Objetivo:
 
@@ -67,13 +67,13 @@ Permitir leitura e manipulação de vídeos.
 
 ## Resultado Esperado
 
-O sistema consegue preparar o conteúdo para análise.
+O sistema consegue localizar, validar e preparar vídeos MP4 com áudio para as próximas etapas de análise.
 
 ---
 
 # Fase 3 — Transcrição
 
-Status: **Concluida**
+Status: **Concluída**
 
 Objetivo:
 
@@ -89,13 +89,13 @@ Converter fala em texto.
 
 ## Resultado Esperado
 
-Todo conteúdo falado fica disponível para análise.
+O conteúdo falado fica disponível em `transcript.json`, com timestamps reutilizáveis para legendas, análise e highlights.
 
 ---
 
 # Fase 4 — Sistema de Highlights
 
-Status: **Planejado**
+Status: **Concluída**
 
 Objetivo:
 
@@ -103,16 +103,23 @@ Detectar automaticamente momentos interessantes.
 
 ## Entregas
 
-* Detector de palavras-chave. ()
-* Detector de intensidade de fala. ()
-* Detector de exclamações. ()
-* Detector de risadas. ()
-* Sistema de score. ()
-* highlights.json. ()
+* Detector de palavras-chave. (**Feito**)
+* Detector de intensidade de fala. (**Feito**)
+* Detector de exclamações. (**Feito**)
+* Detector de risadas. (**Feito**)
+* Sistema de score. (**Feito**)
+* highlights.json. (**Feito**)
+* Perfil rápido para lives de 5 a 6 horas. (**Feito**)
+* Cache respeitado nas etapas até highlights. (**Feito**)
+* Leitura de intensidade sem carregar o WAV inteiro. (**Feito**)
+
+## Meta de Performance
+
+Executar as fases 1 a 4 em 15 a 20 minutos para lives de 5 a 6 horas usando perfil rápido, cache ativo, modelo Whisper leve e leitura de áudio por segmento.
 
 ## Resultado Esperado
 
-A IA consegue localizar candidatos a melhores momentos.
+O sistema gera `cache/highlights/highlights.json` com candidatos a melhores momentos, pontuação e motivos de seleção.
 
 ---
 
