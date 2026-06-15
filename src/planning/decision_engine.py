@@ -1,8 +1,8 @@
 def should_be_short(highlight: dict) -> bool:
-    score = highlight["score"]
+    score = highlight.get("priority_score", highlight["score"])
     duration = highlight["end"] - highlight["start"]
 
-    if score < 0.55:
+    if score <= 0.50:
         return False
 
     if duration < 2:

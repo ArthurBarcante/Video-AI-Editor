@@ -39,16 +39,22 @@ def ensure_safe_project_output_path(output_path: str | Path) -> None:
     )
 
 
+def run_command(command: list[str]) -> subprocess.CompletedProcess:
+    ensure_tool_available(command[0])
+
+    return subprocess.run(
+        command,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+
+
 def run_ffmpeg_command(command: list[str], *, error_label: str) -> None:
     ensure_tool_available(command[0])
 
     try:
-        subprocess.run(
-            command,
-            check=True,
-            capture_output=True,
-            text=True,
-        )
+        run_command(command)
     except subprocess.CalledProcessError as error:
         details = (error.stderr or error.stdout or "").strip()
         message = f"Falha ao executar {error_label}"

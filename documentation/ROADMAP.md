@@ -147,7 +147,7 @@ O sistema gera `cache/edit_plans/edit_plan.json` com shorts, vídeo longo planej
 
 # Fase 6 — Geração de Shorts
 
-Status: **Planejado**
+Status: **Concluída**
 
 Objetivo:
 
@@ -155,20 +155,20 @@ Criar vídeos curtos automaticamente.
 
 ## Entregas
 
-* Seleção automática de trechos. ()
-* Shorts de 15 a 45 segundos. ()
-* Renderização automática. ()
-* Exportação em MP4. ()
+* Seleção automática de trechos. (**Feito**)
+* Shorts de 15 a 45 segundos. (**Feito**)
+* Renderização automática. (**Feito**)
+* Exportação em MP4. (**Feito**)
 
 ## Resultado Esperado
 
-Primeira geração automática de conteúdo.
+O sistema renderiza os shorts planejados em `output/shorts/` como arquivos MP4.
 
 ---
 
 # Fase 7 — Geração de Vídeos Longos
 
-Status: **Planejado**
+Status: **Concluída**
 
 Objetivo:
 
@@ -176,14 +176,14 @@ Montar vídeos completos utilizando os melhores momentos.
 
 ## Entregas
 
-* Agrupamento de highlights. ()
-* Organização narrativa. ()
-* Criação de vídeos entre 20 e 30 minutos. ()
-* Renderização automática. ()
+* Agrupamento de highlights. (**Feito**)
+* Organização narrativa. (**Feito**)
+* Criação de vídeos entre 20 e 30 minutos. (**Feito**)
+* Renderização automática. (**Feito**)
 
 ## Resultado Esperado
 
-Produção automática de vídeos longos para YouTube.
+O sistema renderiza os vídeos longos planejados em `output/long/` como arquivos MP4.
 
 ---
 

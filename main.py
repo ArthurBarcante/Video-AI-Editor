@@ -2,6 +2,8 @@ from pathlib import Path
 
 from src.audio.extractor import extract_audio_from_video
 from src.config.paths import ensure_project_dirs
+from src.editing.long_video_builder import render_long_videos_from_edit_plan
+from src.editing.shorts_builder import render_shorts_from_edit_plan
 from src.config.settings import APP_ENV, APP_NAME
 from src.highlights.detector import detect_highlights
 from src.planning.edit_planner import generate_edit_plan
@@ -60,8 +62,16 @@ def main() -> None:
     )
     logger.info("Edit plan pronto: %s", format_project_path(edit_plan_path))
 
+    shorts_paths = render_shorts_from_edit_plan(edit_plan_path)
+    for short_path in shorts_paths:
+        logger.info("Short pronto: %s", format_project_path(short_path))
+
+    long_video_paths = render_long_videos_from_edit_plan(edit_plan_path)
+    for video_path in long_video_paths:
+        logger.info("Vídeo longo pronto: %s", format_project_path(video_path))
+
     logger.info("Transcrição Concluida")
-    logger.info("Fase 5 concluída com sucesso")
+    logger.info("Fase 7 concluída com sucesso")
 
 
 if __name__ == "__main__":

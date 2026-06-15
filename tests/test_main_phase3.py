@@ -11,6 +11,8 @@ from src.config.paths import (
     CACHE_HIGHLIGHTS_DIR,
     CACHE_TRANSCRIPTS_DIR,
     INPUT_DIR,
+    OUTPUT_LONG_DIR,
+    OUTPUT_SHORTS_DIR,
     OUTPUT_SUBTITLES_DIR,
     ROOT_DIR,
 )
@@ -24,6 +26,8 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     transcript_output = CACHE_TRANSCRIPTS_DIR / "000_pytest_phase3_transcript.json"
     highlights_output = CACHE_HIGHLIGHTS_DIR / "highlights.json"
     edit_plan_output = CACHE_EDIT_PLANS_DIR / "edit_plan.json"
+    short_output = OUTPUT_SHORTS_DIR / "short_01.mp4"
+    long_video_output = OUTPUT_LONG_DIR / "video_01.mp4"
     srt_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.srt"
     ass_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.ass"
 
@@ -48,8 +52,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     previous_edit_plan = (
         edit_plan_output.read_text(encoding="utf-8") if edit_plan_output.exists() else None
     )
+    previous_short = short_output.read_bytes() if short_output.exists() else None
+    previous_long_video = (
+        long_video_output.read_bytes() if long_video_output.exists() else None
+    )
     highlights_output.unlink(missing_ok=True)
     edit_plan_output.unlink(missing_ok=True)
+    short_output.unlink(missing_ok=True)
+    long_video_output.unlink(missing_ok=True)
 
     try:
         result = subprocess.run(
@@ -79,8 +89,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Detecção de highlights concluída: cache/highlights/highlights.json",
             "Edit plan gerado: cache/edit_plans/edit_plan.json",
             "Edit plan pronto: cache/edit_plans/edit_plan.json",
+            "Short exportado: output/shorts/short_01.mp4",
+            "Shorts renderizados: 1",
+            "Short pronto: output/shorts/short_01.mp4",
+            "Vídeo longo exportado: output/long/video_01.mp4",
+            "Vídeos longos renderizados: 1",
+            "Vídeo longo pronto: output/long/video_01.mp4",
             "Transcrição Concluida",
-            "Fase 5 concluída com sucesso",
+            "Fase 7 concluída com sucesso",
         ]
 
         positions = [logs.index(message) for message in expected_order]
@@ -91,6 +107,10 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         assert srt_output.stat().st_size > 0
         assert ass_output.exists()
         assert ass_output.stat().st_size > 0
+        assert short_output.exists()
+        assert short_output.stat().st_size > 0
+        assert long_video_output.exists()
+        assert long_video_output.stat().st_size > 0
         assert load_json(highlights_output) == [
             {
                 "start": 0.0,
@@ -183,3 +203,13 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             edit_plan_output.unlink(missing_ok=True)
         else:
             edit_plan_output.write_text(previous_edit_plan, encoding="utf-8")
+        if previous_short is None:
+            short_output.unlink(missing_ok=True)
+        else:
+            short_output.parent.mkdir(parents=True, exist_ok=True)
+            short_output.write_bytes(previous_short)
+        if previous_long_video is None:
+            long_video_output.unlink(missing_ok=True)
+        else:
+            long_video_output.parent.mkdir(parents=True, exist_ok=True)
+            long_video_output.write_bytes(previous_long_video)
