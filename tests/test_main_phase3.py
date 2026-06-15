@@ -14,6 +14,7 @@ from src.config.paths import (
     OUTPUT_LONG_DIR,
     OUTPUT_SHORTS_DIR,
     OUTPUT_SUBTITLES_DIR,
+    OUTPUT_VERTICAL_DIR,
     ROOT_DIR,
 )
 from src.utils.file_utils import load_json, save_json
@@ -27,9 +28,11 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     highlights_output = CACHE_HIGHLIGHTS_DIR / "highlights.json"
     edit_plan_output = CACHE_EDIT_PLANS_DIR / "edit_plan.json"
     short_output = OUTPUT_SHORTS_DIR / "short_01.mp4"
+    vertical_output = OUTPUT_VERTICAL_DIR / "short_01_vertical.mp4"
     long_video_output = OUTPUT_LONG_DIR / "video_01.mp4"
     srt_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.srt"
-    ass_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.ass"
+    short_ass_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript_short.ass"
+    long_ass_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript_long.ass"
 
     if input_video.exists():
         pytest.skip(f"Arquivo de teste já existe: {input_video}")
@@ -53,13 +56,17 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         edit_plan_output.read_text(encoding="utf-8") if edit_plan_output.exists() else None
     )
     previous_short = short_output.read_bytes() if short_output.exists() else None
+    previous_vertical = vertical_output.read_bytes() if vertical_output.exists() else None
     previous_long_video = (
         long_video_output.read_bytes() if long_video_output.exists() else None
     )
     highlights_output.unlink(missing_ok=True)
     edit_plan_output.unlink(missing_ok=True)
     short_output.unlink(missing_ok=True)
+    vertical_output.unlink(missing_ok=True)
     long_video_output.unlink(missing_ok=True)
+    short_ass_output.unlink(missing_ok=True)
+    long_ass_output.unlink(missing_ok=True)
 
     try:
         result = subprocess.run(
@@ -83,7 +90,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Validação Concluida",
             "Transcrição gerada: cache/transcripts/000_pytest_phase3_transcript.json",
             "SRT gerado: output/subtitles/000_pytest_phase3_transcript.srt",
-            "ASS gerado: output/subtitles/000_pytest_phase3_transcript.ass",
+            (
+                "Legenda ASS para Shorts: "
+                "output/subtitles/000_pytest_phase3_transcript_short.ass"
+            ),
+            (
+                "Legenda ASS para vídeo longo: "
+                "output/subtitles/000_pytest_phase3_transcript_long.ass"
+            ),
             "Highlights gerados: 1",
             "Arquivo salvo em: cache/highlights/highlights.json",
             "Detecção de highlights concluída: cache/highlights/highlights.json",
@@ -92,11 +106,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Short exportado: output/shorts/short_01.mp4",
             "Shorts renderizados: 1",
             "Short pronto: output/shorts/short_01.mp4",
+            "Vídeo vertical gerado: output/vertical/short_01_vertical.mp4",
+            "Shorts verticalizados: 1",
+            "Short vertical pronto: output/vertical/short_01_vertical.mp4",
             "Vídeo longo exportado: output/long/video_01.mp4",
             "Vídeos longos renderizados: 1",
             "Vídeo longo pronto: output/long/video_01.mp4",
             "Transcrição Concluida",
-            "Fase 7 concluída com sucesso",
+            "Fase 11 concluída com sucesso",
         ]
 
         positions = [logs.index(message) for message in expected_order]
@@ -105,10 +122,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         assert audio_output.stat().st_size > 0
         assert srt_output.exists()
         assert srt_output.stat().st_size > 0
-        assert ass_output.exists()
-        assert ass_output.stat().st_size > 0
+        assert short_ass_output.exists()
+        assert short_ass_output.stat().st_size > 0
+        assert long_ass_output.exists()
+        assert long_ass_output.stat().st_size > 0
         assert short_output.exists()
         assert short_output.stat().st_size > 0
+        assert vertical_output.exists()
+        assert vertical_output.stat().st_size > 0
         assert long_video_output.exists()
         assert long_video_output.stat().st_size > 0
         assert load_json(highlights_output) == [
@@ -145,23 +166,16 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
                     "actions": [
                         {
                             "type": "zoom",
-                            "start": 0.0,
-                            "end": 2.5,
-                            "time": None,
-                            "intensity": 1.2,
+                            "intensity": 1.25,
                             "target": "center",
-                            "name": None,
-                            "style": None,
+                            "reason": "zoom por alta intensidade",
                         },
                         {
-                            "type": "subtitle_emphasis",
-                            "start": 0.0,
-                            "end": 3.0,
-                            "time": None,
-                            "intensity": None,
-                            "target": None,
-                            "name": None,
-                            "style": "impact",
+                            "type": "sfx",
+                            "time": 0.0,
+                            "volume": 0.35,
+                            "reason": "sfx por alta intensidade",
+                            "name": "impact",
                         },
                     ],
                 }
@@ -194,7 +208,8 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         audio_output.unlink(missing_ok=True)
         transcript_output.unlink(missing_ok=True)
         srt_output.unlink(missing_ok=True)
-        ass_output.unlink(missing_ok=True)
+        short_ass_output.unlink(missing_ok=True)
+        long_ass_output.unlink(missing_ok=True)
         if previous_highlights is None:
             highlights_output.unlink(missing_ok=True)
         else:
@@ -208,6 +223,11 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         else:
             short_output.parent.mkdir(parents=True, exist_ok=True)
             short_output.write_bytes(previous_short)
+        if previous_vertical is None:
+            vertical_output.unlink(missing_ok=True)
+        else:
+            vertical_output.parent.mkdir(parents=True, exist_ok=True)
+            vertical_output.write_bytes(previous_vertical)
         if previous_long_video is None:
             long_video_output.unlink(missing_ok=True)
         else:

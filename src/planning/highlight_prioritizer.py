@@ -3,11 +3,12 @@ def calculate_priority_score(highlight: dict) -> float:
     reasons = " ".join(highlight.get("reasons", [])).lower()
     text = highlight.get("text", "").lower()
     duration = highlight["end"] - highlight["start"]
+    has_strong_event = "alta intensidade" in reasons or "risada" in reasons
 
     priority = base_score
 
     if "alta intensidade" in reasons:
-        priority += 0.15
+        priority += 0.25
 
     if "risada" in reasons:
         priority += 0.12
@@ -24,7 +25,7 @@ def calculate_priority_score(highlight: dict) -> float:
     if 8 <= duration <= 35:
         priority += 0.10
 
-    if duration < 2:
+    if duration < 2 and not has_strong_event:
         priority -= 0.30
 
     if duration > 60:

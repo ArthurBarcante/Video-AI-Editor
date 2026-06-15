@@ -15,6 +15,7 @@ from src.config.settings import (
     WHISPER_VAD_FILTER,
 )
 from src.rendering.ffmpeg_utils import ensure_safe_project_output_path
+from src.transcription.text_cleaner import clean_transcript_text
 from src.transcription.transcript_schema import Transcript, TranscriptSegment
 from src.utils.file_utils import format_project_path, save_json
 from src.utils.logger import get_logger
@@ -95,11 +96,12 @@ def transcribe_audio(
         beam_size=WHISPER_BEAM_SIZE,
         best_of=WHISPER_BEST_OF,
         condition_on_previous_text=WHISPER_CONDITION_ON_PREVIOUS_TEXT,
+        word_timestamps=True,
     )
 
     transcript_segments = []
     for segment in segments:
-        text = str(segment.text).strip()
+        text = clean_transcript_text(segment.text)
         if not text:
             continue
 

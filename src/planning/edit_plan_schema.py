@@ -8,6 +8,8 @@ class EditAction(BaseModel):
     time: float | None = None
     intensity: float | None = None
     target: str | None = None
+    volume: float | None = None
+    reason: str | None = None
     name: str | None = None
     style: str | None = None
 

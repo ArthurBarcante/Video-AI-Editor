@@ -1,0 +1,254 @@
+# Estrutura Do Projeto
+
+Este documento explica a organização do repositório e o papel de cada pasta e arquivo relevante. A ideia é que qualquer pessoa consiga abrir o projeto e entender onde cada responsabilidade fica.
+
+## Raiz Do Projeto
+
+`main.py`
+: Ponto de entrada do pipeline. Ele chama as etapas em ordem: localizar vídeo, validar, extrair áudio, transcrever, gerar legendas, detectar highlights, gerar plano de edição, renderizar shorts, verticalizar shorts e renderizar vídeo longo.
+
+`README.md`
+: Glossário das documentações e guia para rodar ou atualizar o projeto em outro computador.
+
+`requirements.txt`
+: Lista de dependências Python usadas pelo projeto.
+
+`pytest.ini`
+: Configuração do Pytest.
+
+`pyrightconfig.json`
+: Configuração de análise estática do Pyright.
+
+`.env`
+: Configuração local do projeto. Define ambiente, modelo Whisper, limites de shorts, scores mínimos e outras variáveis. Não deve ser usado como documentação pública de valores finais.
+
+`.env.example`
+: Modelo de configuração para criar um `.env` novo.
+
+`.gitignore`
+: Define arquivos e pastas que não devem entrar no Git.
+
+## Pastas De Entrada, Cache, Assets E Saída
+
+`input/`
+: Onde a live bruta deve ser colocada. O leitor procura arquivos `.mp4` nessa pasta e usa o primeiro encontrado em ordem alfabética.
+
+`cache/`
+: Guarda arquivos intermediários para acelerar execuções futuras.
+
+`cache/audio/`
+: Recebe o áudio `.wav` extraído da live.
+
+`cache/transcripts/`
+: Recebe a transcrição em JSON gerada pelo Whisper.
+
+`cache/highlights/`
+: Recebe `highlights.json`, com trechos candidatos a cortes.
+
+`cache/edit_plans/`
+: Recebe `edit_plan.json`, que descreve como os vídeos serão montados.
+
+`cache/metadata/`
+: Guarda metadados coletados dos vídeos quando usados.
+
+`cache/video/`
+: Área reservada para arquivos intermediários de vídeo.
+
+`assets/`
+: Biblioteca de recursos externos usados na edição.
+
+`assets/sfx/`
+: Biblioteca de efeitos sonoros. Exemplo atual: `pop.mp3`.
+
+`assets/fonts/`
+: Pasta reservada para fontes usadas em legendas ou renderizações.
+
+`assets/overlays/`
+: Pasta reservada para elementos visuais sobrepostos.
+
+`output/`
+: Guarda os resultados finais.
+
+`output/shorts/`
+: Shorts horizontais ou baseados no corte original.
+
+`output/vertical/`
+: Shorts convertidos para 9:16 com fundo blur.
+
+`output/long/`
+: Vídeos longos montados a partir dos melhores segmentos.
+
+`output/subtitles/`
+: Legendas `.srt` e `.ass`.
+
+## Documentação
+
+`documentation/ROADMAP.md`
+: Planejamento por fases. Mostra entregas, status e resultado esperado.
+
+`documentation/ESTRUTURA.md`
+: Este documento. Explica a arquitetura física do repositório.
+
+`documentation/EXPLICAÇÕES/IA.md`
+: Explica a IA, as heurísticas e as regras de decisão.
+
+`documentation/EXPLICAÇÕES/LÓGICAS.md`
+: Explica o fluxo macro do sistema.
+
+## Código Fonte
+
+`src/__init__.py`
+: Marca `src` como pacote Python.
+
+### `src/audio/`
+
+`src/audio/__init__.py`
+: Marca o módulo de áudio como pacote.
+
+`src/audio/extractor.py`
+: Extrai áudio do vídeo com FFmpeg. Gera WAV mono em 16 kHz em `cache/audio/`, formato usado pela transcrição e análise de intensidade.
+
+### `src/config/`
+
+`src/config/__init__.py`
+: Marca o módulo de configuração como pacote.
+
+`src/config/paths.py`
+: Centraliza caminhos do projeto: `input`, `cache`, `output`, `assets` e subpastas. Também cria diretórios necessários com `ensure_project_dirs()`.
+
+`src/config/settings.py`
+: Lê variáveis do `.env` e define parâmetros do sistema, como modelo Whisper, score mínimo de highlight, duração dos shorts, quantidade máxima de shorts e tamanho vertical.
+
+### `src/video/`
+
+`src/video/reader.py`
+: Lista vídeos em `input/` e retorna o primeiro `.mp4` encontrado.
+
+`src/video/validator.py`
+: Valida se o arquivo existe, é `.mp4`, não está vazio e possui streams de áudio e vídeo.
+
+`src/video/metadata.py`
+: Usa FFprobe para obter duração, tamanho, codecs, resolução e FPS.
+
+`src/video/converter.py`
+: Contém utilidades de conversão de vídeo usadas por testes e futuras etapas de render.
+
+### `src/transcription/`
+
+`src/transcription/whisper_transcriber.py`
+: Carrega o Faster Whisper, transcreve o áudio e salva a transcrição JSON em `cache/transcripts/`.
+
+`src/transcription/transcript_schema.py`
+: Define os schemas Pydantic de transcrição e segmentos.
+
+`src/transcription/text_cleaner.py`
+: Normaliza textos transcritos antes de salvar os segmentos.
+
+### `src/subtitles/`
+
+`src/subtitles/srt_generator.py`
+: Gera legenda `.srt` simples a partir da transcrição.
+
+`src/subtitles/ass_generator.py`
+: Gera legendas `.ass` em modo `short` e `long`. O modo short usa texto maior, quebra curta e destaque de palavras importantes.
+
+`src/subtitles/line_breaker.py`
+: Quebra linhas de legenda para manter leitura confortável.
+
+`src/subtitles/word_highlighter.py`
+: Destaca palavras importantes em ASS com cor e negrito.
+
+`src/subtitles/subtitle_renderer.py`
+: Área reservada para renderização de legendas diretamente no vídeo.
+
+### `src/highlights/`
+
+`src/highlights/detector.py`
+: Lê a transcrição e o áudio, calcula energia por segmento, detecta risadas, calcula score e salva `highlights.json`.
+
+`src/highlights/scorer.py`
+: Define palavras-chave e heurísticas que somam pontos ao highlight.
+
+`src/highlights/audio_intensity.py`
+: Lê WAV e calcula energia RMS por trecho.
+
+`src/highlights/laugh_detector.py`
+: Detecta risadas por texto e por combinação de texto com intensidade.
+
+`src/highlights/highlight_schema.py`
+: Define o schema de um highlight.
+
+### `src/planning/`
+
+`src/planning/edit_planner.py`
+: Gera o plano de edição completo. Carrega highlights, prioriza, planeja shorts e vídeos longos, e salva `edit_plan.json`.
+
+`src/planning/edit_plan_schema.py`
+: Define os schemas Pydantic do plano: ações, shorts, segmentos longos, vídeos longos e plano final.
+
+`src/planning/highlight_prioritizer.py`
+: Calcula `priority_score`, ajustando o score original com sinais como intensidade, risada, exclamação, palavras-chave e duração.
+
+`src/planning/decision_engine.py`
+: Decide se um highlight vira short, se entra no vídeo longo, qual estilo recebe e quais ações automáticas serão aplicadas.
+
+`src/planning/shorts_planner.py`
+: Seleciona os melhores highlights para shorts, expande a janela para duração mínima/máxima, cria título e adiciona estilo/ações.
+
+`src/planning/long_video_planner.py`
+: Seleciona highlights para o vídeo longo, adiciona contexto antes/depois, limita duração total e mantém ordem cronológica.
+
+### `src/effects/`
+
+`src/effects/zoom_effects.py`
+: Identifica ações de zoom e monta o filtro FFmpeg de crop/scale para aplicar zoom no vídeo.
+
+`src/effects/sfx_effects.py`
+: Mapeia a biblioteca de SFX e resolve arquivos como `pop`, `impact`, `laugh` e `suspense`.
+
+### `src/editing/`
+
+`src/editing/shorts_builder.py`
+: Renderiza shorts a partir do `edit_plan.json`. Aplica corte, zoom, SFX e exporta para `output/shorts/`.
+
+`src/editing/long_video_builder.py`
+: Corta segmentos do vídeo original, concatena em ordem e exporta o vídeo longo em `output/long/`.
+
+### `src/rendering/`
+
+`src/rendering/ffmpeg_utils.py`
+: Centraliza execução de FFmpeg/FFprobe, valida ferramentas disponíveis e protege caminhos de saída dentro do projeto.
+
+`src/rendering/verticalizer.py`
+: Converte shorts para 9:16 com fundo blur e vídeo real centralizado.
+
+`src/rendering/video_renderer.py`
+: Placeholder para uma camada futura de renderização geral baseada no plano de edição.
+
+### `src/utils/`
+
+`src/utils/file_utils.py`
+: Funções para ler/salvar JSON, criar diretórios e formatar caminhos relativos ao projeto.
+
+`src/utils/logger.py`
+: Configuração central de logs.
+
+`src/utils/time_utils.py`
+: Conversões de segundos para timestamps SRT e ASS.
+
+`src/utils/cache_utils.py`
+: Área de utilidades de cache para expansões futuras.
+
+## Testes
+
+`tests/`
+: Contém testes automatizados do pipeline.
+
+`tests/conftest.py`
+: Fixtures compartilhadas, incluindo vídeos/áudios de amostra.
+
+`tests/test_main_phase3.py`
+: Teste integrado do fluxo principal.
+
+`tests/test_*`
+: Testes unitários dos módulos de áudio, vídeo, transcrição, legendas, highlights, planejamento, renderização, SFX e verticalização.

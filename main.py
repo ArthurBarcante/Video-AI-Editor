@@ -7,6 +7,7 @@ from src.editing.shorts_builder import render_shorts_from_edit_plan
 from src.config.settings import APP_ENV, APP_NAME
 from src.highlights.detector import detect_highlights
 from src.planning.edit_planner import generate_edit_plan
+from src.rendering.verticalizer import verticalize_shorts
 from src.subtitles.ass_generator import generate_ass
 from src.subtitles.srt_generator import generate_srt
 from src.transcription.whisper_transcriber import transcribe_audio
@@ -47,8 +48,17 @@ def main() -> None:
     srt_path = generate_srt(transcript_path)
     logger.info("SRT gerado: %s", format_project_path(srt_path))
 
-    ass_path = generate_ass(transcript_path)
-    logger.info("ASS gerado: %s", format_project_path(ass_path))
+    short_ass_path = generate_ass(
+        transcript_path,
+        mode="short",
+    )
+    logger.info("Legenda ASS para Shorts: %s", format_project_path(short_ass_path))
+
+    long_ass_path = generate_ass(
+        transcript_path,
+        mode="long",
+    )
+    logger.info("Legenda ASS para vídeo longo: %s", format_project_path(long_ass_path))
 
     highlights_path = detect_highlights(
         transcript_path=transcript_path,
@@ -66,12 +76,16 @@ def main() -> None:
     for short_path in shorts_paths:
         logger.info("Short pronto: %s", format_project_path(short_path))
 
+    vertical_paths = verticalize_shorts(shorts_paths)
+    for vertical_path in vertical_paths:
+        logger.info("Short vertical pronto: %s", format_project_path(vertical_path))
+
     long_video_paths = render_long_videos_from_edit_plan(edit_plan_path)
     for video_path in long_video_paths:
         logger.info("Vídeo longo pronto: %s", format_project_path(video_path))
 
     logger.info("Transcrição Concluida")
-    logger.info("Fase 7 concluída com sucesso")
+    logger.info("Fase 11 concluída com sucesso")
 
 
 if __name__ == "__main__":

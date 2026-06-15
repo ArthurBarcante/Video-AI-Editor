@@ -1,130 +1,125 @@
 # Video AI Editor
 
-## Visão Geral
+Este repositório contém um pipeline de edição automática para transformar uma live bruta em conteúdos prontos para publicação: shorts, vídeos longos, legendas, zooms, efeitos sonoros e versões verticais.
 
-O Video AI Editor é um projeto de inteligência artificial para edição automática de vídeos.
+Este `README.md` funciona como glossário das documentações do projeto e como guia rápido para levar o projeto para outro computador usando Git.
 
-A proposta é transformar uma live bruta de várias horas em múltiplos conteúdos prontos para publicação, sem necessidade de edição manual.
+## Glossário Das Documentações
 
-A partir de um único arquivo de vídeo, o sistema será capaz de analisar o conteúdo, identificar os melhores momentos, criar vídeos longos editados, gerar Shorts, adicionar legendas e aplicar efeitos de edição automaticamente.
+`documentation/ROADMAP.md`
+: Lista as fases do projeto, o status de cada uma e os resultados esperados. Use este arquivo para saber o que já foi entregue e o que ainda está planejado.
 
----
+`documentation/ESTRUTURA.md`
+: Explica a estrutura do repositório em detalhes. Mostra o papel de cada pasta, página e arquivo importante do projeto.
 
-# O Problema
+`documentation/EXPLICAÇÕES/IA.md`
+: Registra como a IA do projeto funciona hoje. Explica as heurísticas de highlights, priorização, planejamento de cortes, ações automáticas, SFX e verticalização.
 
-Criadores de conteúdo frequentemente passam horas editando vídeos após uma transmissão ao vivo.
+`documentation/EXPLICAÇÕES/LÓGICAS.md`
+: Explica o fluxo macro do sistema. É o melhor arquivo para entender como o `main.py` orquestra as etapas de entrada, análise, planejamento e renderização.
 
-O processo normalmente envolve:
+## Glossário Técnico Rápido
 
-* Assistir novamente toda a live.
-* Encontrar os melhores momentos.
-* Criar cortes para Shorts.
-* Produzir vídeos editados para YouTube.
-* Adicionar legendas.
-* Aplicar zooms e efeitos.
-* Exportar diferentes formatos.
+`input/`
+: Pasta onde entra a live bruta em `.mp4`.
 
-Em muitos casos, a pós-produção consome mais tempo do que a própria gravação.
+`cache/`
+: Pasta de arquivos intermediários reutilizáveis, como áudio extraído, transcrição, highlights e plano de edição.
 
----
+`output/`
+: Pasta de resultados finais: shorts, vídeo longo, legendas e versões verticais.
 
-# A Solução
+`assets/`
+: Biblioteca de recursos usados na edição, como efeitos sonoros, fontes e overlays.
 
-O objetivo deste projeto é automatizar esse fluxo utilizando inteligência artificial.
+`main.py`
+: Ponto de entrada do sistema. Executa o pipeline completo.
 
-O sistema deverá receber uma live completa em formato de vídeo e produzir automaticamente:
+`edit_plan.json`
+: Plano de edição gerado automaticamente. Define shorts, vídeos longos, segmentos e ações como zoom e SFX.
 
-* Shorts verticais.
-* Vídeos longos editados.
-* Legendas sincronizadas.
-* Cortes inteligentes.
-* Zooms automáticos.
-* Efeitos sonoros.
-* Arquivos prontos para publicação.
+`highlight`
+: Trecho da live que recebeu score suficiente para ser considerado um bom momento.
 
----
+`priority_score`
+: Score ajustado usado para escolher os melhores highlights, sem depender apenas do score inicial.
 
-# Objetivos
+`action`
+: Ação de edição planejada para um short, como `zoom` ou `sfx`.
 
-## Geração automática de Shorts
+## Rodando O Projeto
 
-A IA deverá identificar os melhores momentos da live e criar vídeos curtos otimizados para:
+1. Coloque um vídeo `.mp4` em `input/`.
+2. Configure o `.env` com os parâmetros desejados.
+3. Rode o pipeline:
 
-* YouTube Shorts
-* TikTok
-* Instagram Reels
-
----
-
-## Geração automática de vídeos longos
-
-Além dos Shorts, a IA deverá criar vídeos editados com duração entre 20 e 30 minutos contendo os momentos mais relevantes da transmissão.
-
----
-
-## Legendas automáticas
-
-O sistema deverá gerar legendas automaticamente a partir da fala detectada no vídeo.
-
----
-
-## Edição inteligente
-
-O objetivo é que a IA seja capaz de tomar decisões semelhantes às de um editor humano, incluindo:
-
-* cortes automáticos;
-* ritmo de edição;
-* destaque de momentos importantes;
-* zooms em reações;
-* efeitos sonoros;
-* destaque visual de palavras-chave.
-
----
-
-# Arquitetura Conceitual
-
-```text
-Live Bruta
-     │
-     ▼
-Análise de Conteúdo
-     │
-     ▼
-Detecção de Highlights
-     │
-     ▼
-Planejamento da Edição
-     │
-     ▼
-Renderização
-     │
-     ▼
-Vídeos Finais
+```bash
+./.venv/bin/python main.py
 ```
 
----
+Neste ambiente, o comando `python main.py` pode não funcionar se `python` não existir no PATH. Usar `./.venv/bin/python main.py` evita esse problema.
 
-# Público-Alvo
+## Passando O Projeto Para Outro Computador
 
-O projeto foi idealizado para:
+No computador atual, salve as mudanças no Git e envie para o repositório remoto:
 
-* Streamers
-* Criadores de conteúdo
-* Canais de gameplay
-* YouTubers
-* Podcasters
-* Produtores de conteúdo educacional
+```bash
+git status
+git add .
+git commit -m "Atualiza documentacao e pipeline"
+git push
+```
 
----
+No outro computador, baixe ou atualize o projeto:
 
-# Status
+```bash
+git clone <url-do-repositorio>
+cd projeto_ai_editor
+```
 
-🚧 Projeto em desenvolvimento inicial.
+Se o projeto já existir nesse computador:
 
-Atualmente o foco está na definição da arquitetura, estrutura de código e construção da primeira versão funcional do pipeline.
+```bash
+cd projeto_ai_editor
+git pull
+```
 
----
+Depois prepare o ambiente:
 
-# Missão
+```bash
+python3 -m venv .venv
+./.venv/bin/pip install -r requirements.txt
+cp .env.example .env
+```
 
-Permitir que uma live de várias horas seja transformada automaticamente em múltiplos conteúdos prontos para publicação através de inteligência artificial.
+Também é necessário ter o FFmpeg instalado no sistema:
+
+```bash
+ffmpeg -version
+ffprobe -version
+```
+
+Arquivos grandes, como vídeos em `input/`, saídas em `output/` e caches em `cache/`, podem não estar versionados. Se o outro computador precisar reproduzir exatamente o mesmo processamento, copie também os arquivos de mídia necessários.
+
+## Saídas Esperadas
+
+Após uma execução completa, o projeto pode gerar:
+
+```text
+cache/audio/
+cache/transcripts/
+cache/highlights/highlights.json
+cache/edit_plans/edit_plan.json
+output/subtitles/
+output/shorts/
+output/long/
+output/vertical/
+```
+
+O arquivo mais importante para auditoria da edição é:
+
+```text
+cache/edit_plans/edit_plan.json
+```
+
+Ele mostra quais cortes foram escolhidos e quais ações automáticas serão aplicadas.

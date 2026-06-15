@@ -189,7 +189,7 @@ O sistema renderiza os vídeos longos planejados em `output/long/` como arquivos
 
 # Fase 8 — Legendas Inteligentes
 
-Status: **Planejado**
+Status: **Concluído**
 
 Objetivo:
 
@@ -197,11 +197,11 @@ Melhorar a experiência visual.
 
 ## Entregas
 
-* Estilos dinâmicos. ()
-* Destaque de palavras. ()
-* Quebra inteligente de linhas. ()
-* Legendas para Shorts. ()
-* Legendas para vídeos longos. ()
+* Estilos dinâmicos. (**Feito**)
+* Destaque de palavras. (**Feito**)
+* Quebra inteligente de linhas. (**Feito**)
+* Legendas para Shorts. (**Feito**)
+* Legendas para vídeos longos. (**Feito**)
 
 ## Resultado Esperado
 
@@ -211,7 +211,7 @@ Conteúdo mais profissional e mais fácil de consumir.
 
 # Fase 9 — Zooms Automáticos
 
-Status: **Planejado**
+Status: **Concluído**
 
 Objetivo:
 
@@ -219,10 +219,10 @@ Destacar momentos importantes.
 
 ## Entregas
 
-* Zoom baseado em eventos. ()
-* Zoom baseado em palavras-chave. ()
-* Zoom baseado em emoção. ()
-* Configuração de intensidade. ()
+* Zoom baseado em eventos. (**Feito**)
+* Zoom baseado em palavras-chave. (**Feito**)
+* Zoom baseado em emoção. (**Feito**)
+* Configuração de intensidade. (**Feito**)
 
 ## Resultado Esperado
 
@@ -232,7 +232,7 @@ Vídeos mais dinâmicos sem edição manual.
 
 # Fase 10 — Efeitos Sonoros
 
-Status: **Planejado**
+Status: **Concluído**
 
 Objetivo:
 
@@ -240,10 +240,10 @@ Adicionar impacto à edição.
 
 ## Entregas
 
-* Biblioteca de SFX. ()
-* Aplicação automática. ()
-* Regras de uso. ()
-* Controle de frequência. ()
+* Biblioteca de SFX. (**Feito**)
+* Aplicação automática. (**Feito**)
+* Regras de uso. (**Feito**)
+* Controle de frequência. (**Feito**)
 
 ## Resultado Esperado
 
@@ -253,7 +253,7 @@ Conteúdo mais envolvente.
 
 # Fase 11 — Verticalização Inteligente
 
-Status: **Planejado**
+Status: **Concluído**
 
 Objetivo:
 
@@ -261,10 +261,10 @@ Criar versões para Shorts e Reels.
 
 ## Entregas
 
-* Conversão automática para 9:16. ()
-* Crop automático. ()
-* Blur de fundo. ()
-* Layout adaptativo. ()
+* Conversão automática para 9:16. (**Feito**)
+* Crop automático simples. (**Feito**)
+* Blur de fundo. (**Feito**)
+* Layout adaptativo básico. (**Feito**)
 
 ## Resultado Esperado
 
@@ -274,7 +274,7 @@ Conteúdo otimizado para dispositivos móveis.
 
 # Fase 12 — IA de Contexto
 
-Status: **Futuro**
+Status: **Desenvolvimento**
 
 Objetivo:
 
@@ -295,7 +295,7 @@ Highlights mais inteligentes.
 
 # Fase 13 — IA de Emoção
 
-Status: **Futuro**
+Status: **Desenvolvimento**
 
 Objetivo:
 
@@ -407,6 +407,87 @@ Arquivos prontos para postagem ()
 ```
 
 Sem necessidade de edição manual.
+
+---
+
+# Fase 18 - Otimizar Edição para Funcionar com Brutos de Live
+
+Status: **Futuro**
+
+Objetivo:
+
+Melhorar tempo de edição e agilizar etapas
+
+## Entregas
+
+* Código limpo e otimizado. ()
+* Execução das tarefas em 40-60 min de uma live de 5-6 horas. ()
+* Shorts de 15 - 45 segundos completamente editados corretamente. ()
+* Vídeos de 20-30 min editados corretamente. ()
+
+## Resultado Esperado
+
+Rapidez e agilidade do script
+
+---
+
+---
+
+# Fase 19 — Legendas Geradas por Cortes
+
+Status: **Futuro**
+
+Objetivo:
+
+Melhorar edição de Shorts e otimizá-la
+
+## Entregas
+
+* Criação de .ass por shorts ()
+* Legendas separadas por corte ()
+
+## Resultado Esperado
+
+Legendas diferentes entre si para facilitar edição de shorts
+
+---
+# Fase 20 - Zoom Temporal
+
+Status: **Futuro**
+
+Objetivo:
+
+Melhorar efeito de Zoom
+
+## Entregas
+
+* FFMpeg usando enable='between(t,start,end)' ()
+* Efeitos de zoom preciso ()
+
+## Resultado Esperado
+
+Zooms precisos e com intervalos de tempos claros
+
+---
+
+# Fase 21 - Shorts Melhores
+
+Status: **Futuro**
+
+Objetivo:
+
+Melhorar visual dos shorts
+
+## Entregas
+
+* Modo blur_background. ()
+* Modo center_crop. ()
+* Modo top_gameplay_bottom_facecam. ()
+* Modo facecam_priority ()
+
+## Resultado Esperado
+
+Shorts variados com visuais diferentes dependendo do modo
 
 ---
 

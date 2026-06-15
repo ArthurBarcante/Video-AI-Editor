@@ -42,7 +42,7 @@ def generate_edit_plan(
         long_videos=long_videos,
     )
 
-    save_json(edit_plan.model_dump(), output_path)
+    save_json(edit_plan.model_dump(exclude_none=True), output_path)
 
     logger.info("Edit plan gerado: %s", format_project_path(output_path))
     logger.info("Shorts planejados: %s", len(shorts))
