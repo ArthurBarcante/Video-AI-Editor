@@ -5,7 +5,7 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 ## Raiz Do Projeto
 
 `main.py`
-: Ponto de entrada do pipeline. Ele chama as etapas em ordem: localizar vídeo, validar, extrair áudio, transcrever, gerar legendas, detectar highlights, gerar plano de edição, renderizar shorts, verticalizar shorts e renderizar vídeo longo.
+: Ponto de entrada do pipeline. Ele chama as etapas em ordem: localizar vídeo, validar, extrair áudio, transcrever, gerar legendas, detectar highlights, analisar contexto, analisar emoções, gerar plano de edição, renderizar shorts, verticalizar shorts e renderizar vídeo longo.
 
 `README.md`
 : Glossário das documentações e guia para rodar ou atualizar o projeto em outro computador.
@@ -44,6 +44,12 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 
 `cache/highlights/`
 : Recebe `highlights.json`, com trechos candidatos a cortes.
+
+`cache/context/`
+: Recebe `context.json`, com blocos semânticos agrupados por tempo e assunto.
+
+`cache/emotions/`
+: Recebe `emotions.json`, com emoção, score emocional e intensidade de áudio por segmento.
 
 `cache/edit_plans/`
 : Recebe `edit_plan.json`, que descreve como os vídeos serão montados.
@@ -178,16 +184,47 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 `src/highlights/highlight_schema.py`
 : Define o schema de um highlight.
 
+### `src/context/`
+
+`src/context/__init__.py`
+: Marca o módulo de contexto como pacote.
+
+`src/context/context_analyser.py`
+: Gera `cache/context/context.json` a partir da transcrição. Agrupa segmentos, extrai palavras relevantes, infere tópico e calcula importância do bloco.
+
+`src/context/context_schema.py`
+: Define os schemas Pydantic de blocos de contexto e análise de contexto.
+
+`src/context/semantic_analyzer.py`
+: Contém termos relevantes, extração de keywords, inferência de tópico e cálculo de importância semântica.
+
+`src/context/topic_grouper.py`
+: Agrupa segmentos próximos da transcrição em blocos de contexto por intervalo de tempo.
+
+### `src/emotion/`
+
+`src/emotion/__init__.py`
+: Marca o módulo de emoção como pacote.
+
+`src/emotion/emotion_analyzer.py`
+: Gera `cache/emotions/emotions.json` cruzando texto transcrito com intensidade de áudio.
+
+`src/emotion/emotion_rules.py`
+: Define palavras e regras para detectar surpresa, raiva, alegria e empolgação.
+
+`src/emotion/emotion_schema.py`
+: Define os schemas Pydantic da análise emocional.
+
 ### `src/planning/`
 
 `src/planning/edit_planner.py`
-: Gera o plano de edição completo. Carrega highlights, prioriza, planeja shorts e vídeos longos, e salva `edit_plan.json`.
+: Gera o plano de edição completo. Carrega highlights, contexto e emoções; prioriza; planeja shorts e vídeos longos; e salva `edit_plan.json`.
 
 `src/planning/edit_plan_schema.py`
 : Define os schemas Pydantic do plano: ações, shorts, segmentos longos, vídeos longos e plano final.
 
 `src/planning/highlight_prioritizer.py`
-: Calcula `priority_score`, ajustando o score original com sinais como intensidade, risada, exclamação, palavras-chave e duração.
+: Calcula `priority_score`, ajustando o score original com sinais como intensidade, risada, exclamação, palavras-chave, duração, contexto e emoção.
 
 `src/planning/decision_engine.py`
 : Decide se um highlight vira short, se entra no vídeo longo, qual estilo recebe e quais ações automáticas serão aplicadas.
@@ -251,4 +288,4 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 : Teste integrado do fluxo principal.
 
 `tests/test_*`
-: Testes unitários dos módulos de áudio, vídeo, transcrição, legendas, highlights, planejamento, renderização, SFX e verticalização.
+: Testes unitários dos módulos de áudio, vídeo, transcrição, legendas, highlights, contexto, emoção, planejamento, renderização, SFX e verticalização.

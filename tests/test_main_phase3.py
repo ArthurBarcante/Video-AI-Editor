@@ -7,6 +7,8 @@ import pytest
 
 from src.config.paths import (
     CACHE_AUDIO_DIR,
+    CACHE_CONTEXT_DIR,
+    CACHE_EMOTIONS_DIR,
     CACHE_EDIT_PLANS_DIR,
     CACHE_HIGHLIGHTS_DIR,
     CACHE_TRANSCRIPTS_DIR,
@@ -25,6 +27,8 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     input_video = INPUT_DIR / "000_pytest_phase3.mp4"
     audio_output = CACHE_AUDIO_DIR / "000_pytest_phase3.wav"
     transcript_output = CACHE_TRANSCRIPTS_DIR / "000_pytest_phase3_transcript.json"
+    context_output = CACHE_CONTEXT_DIR / "context.json"
+    emotions_output = CACHE_EMOTIONS_DIR / "emotions.json"
     highlights_output = CACHE_HIGHLIGHTS_DIR / "highlights.json"
     edit_plan_output = CACHE_EDIT_PLANS_DIR / "edit_plan.json"
     short_output = OUTPUT_SHORTS_DIR / "short_01.mp4"
@@ -55,12 +59,20 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     previous_edit_plan = (
         edit_plan_output.read_text(encoding="utf-8") if edit_plan_output.exists() else None
     )
+    previous_context = (
+        context_output.read_text(encoding="utf-8") if context_output.exists() else None
+    )
+    previous_emotions = (
+        emotions_output.read_text(encoding="utf-8") if emotions_output.exists() else None
+    )
     previous_short = short_output.read_bytes() if short_output.exists() else None
     previous_vertical = vertical_output.read_bytes() if vertical_output.exists() else None
     previous_long_video = (
         long_video_output.read_bytes() if long_video_output.exists() else None
     )
     highlights_output.unlink(missing_ok=True)
+    context_output.unlink(missing_ok=True)
+    emotions_output.unlink(missing_ok=True)
     edit_plan_output.unlink(missing_ok=True)
     short_output.unlink(missing_ok=True)
     vertical_output.unlink(missing_ok=True)
@@ -101,6 +113,11 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Highlights gerados: 1",
             "Arquivo salvo em: cache/highlights/highlights.json",
             "Detecção de highlights concluída: cache/highlights/highlights.json",
+            "Blocos de contexto gerados: 1",
+            "Contexto salvo em: cache/context/context.json",
+            "Contexto pronto: cache/context/context.json",
+            "Análise emocional salva em: cache/emotions/emotions.json",
+            "Emoções prontas: cache/emotions/emotions.json",
             "Edit plan gerado: cache/edit_plans/edit_plan.json",
             "Edit plan pronto: cache/edit_plans/edit_plan.json",
             "Short exportado: output/shorts/short_01.mp4",
@@ -113,7 +130,7 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Vídeos longos renderizados: 1",
             "Vídeo longo pronto: output/long/video_01.mp4",
             "Transcrição Concluida",
-            "Fase 11 concluída com sucesso",
+            "Fase 13 concluída com sucesso",
         ]
 
         positions = [logs.index(message) for message in expected_order]
@@ -126,6 +143,10 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         assert short_ass_output.stat().st_size > 0
         assert long_ass_output.exists()
         assert long_ass_output.stat().st_size > 0
+        assert context_output.exists()
+        assert context_output.stat().st_size > 0
+        assert emotions_output.exists()
+        assert emotions_output.stat().st_size > 0
         assert short_output.exists()
         assert short_output.stat().st_size > 0
         assert vertical_output.exists()
@@ -147,6 +168,45 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
                 ],
             }
         ]
+        assert load_json(context_output) == {
+            "source_transcript": (
+                "cache/transcripts/000_pytest_phase3_transcript.json"
+            ),
+            "blocks": [
+                {
+                    "id": "context_001",
+                    "start": 0.0,
+                    "end": 3.0,
+                    "duration": 3.0,
+                    "text": "mano, não acredito nisso!",
+                    "keywords": [],
+                    "topic": "conversa geral",
+                    "importance_score": 0.0,
+                    "reasons": [],
+                }
+            ],
+        }
+        assert load_json(emotions_output) == {
+            "source_transcript": (
+                "cache/transcripts/000_pytest_phase3_transcript.json"
+            ),
+            "source_audio": "cache/audio/000_pytest_phase3.wav",
+            "segments": [
+                {
+                    "start": 0.0,
+                    "end": 3.0,
+                    "text": "mano, não acredito nisso!",
+                    "emotion": "surprise",
+                    "emotion_score": 0.53,
+                    "audio_intensity": 1.0,
+                    "reasons": [
+                        "surpresa: não acredito",
+                        "exclamação detectada",
+                        "alta intensidade de áudio",
+                    ],
+                }
+            ],
+        }
         assert load_json(edit_plan_output) == {
             "source_video": "input/000_pytest_phase3.mp4",
             "shorts": [
@@ -218,6 +278,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             edit_plan_output.unlink(missing_ok=True)
         else:
             edit_plan_output.write_text(previous_edit_plan, encoding="utf-8")
+        if previous_context is None:
+            context_output.unlink(missing_ok=True)
+        else:
+            context_output.write_text(previous_context, encoding="utf-8")
+        if previous_emotions is None:
+            emotions_output.unlink(missing_ok=True)
+        else:
+            emotions_output.write_text(previous_emotions, encoding="utf-8")
         if previous_short is None:
             short_output.unlink(missing_ok=True)
         else:

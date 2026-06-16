@@ -13,7 +13,7 @@ Este `README.md` funciona como glossário das documentações do projeto e como 
 : Explica a estrutura do repositório em detalhes. Mostra o papel de cada pasta, página e arquivo importante do projeto.
 
 `documentation/EXPLICAÇÕES/IA.md`
-: Registra como a IA do projeto funciona hoje. Explica as heurísticas de highlights, priorização, planejamento de cortes, ações automáticas, SFX e verticalização.
+: Registra como a IA do projeto funciona hoje. Explica as heurísticas de highlights, contexto, emoção, priorização, planejamento de cortes, ações automáticas, SFX e verticalização.
 
 `documentation/EXPLICAÇÕES/LÓGICAS.md`
 : Explica o fluxo macro do sistema. É o melhor arquivo para entender como o `main.py` orquestra as etapas de entrada, análise, planejamento e renderização.
@@ -24,7 +24,7 @@ Este `README.md` funciona como glossário das documentações do projeto e como 
 : Pasta onde entra a live bruta em `.mp4`.
 
 `cache/`
-: Pasta de arquivos intermediários reutilizáveis, como áudio extraído, transcrição, highlights e plano de edição.
+: Pasta de arquivos intermediários reutilizáveis, como áudio extraído, transcrição, highlights, contexto, emoções e plano de edição.
 
 `output/`
 : Pasta de resultados finais: shorts, vídeo longo, legendas e versões verticais.
@@ -42,7 +42,13 @@ Este `README.md` funciona como glossário das documentações do projeto e como 
 : Trecho da live que recebeu score suficiente para ser considerado um bom momento.
 
 `priority_score`
-: Score ajustado usado para escolher os melhores highlights, sem depender apenas do score inicial.
+: Score ajustado usado para escolher os melhores highlights, cruzando score inicial, contexto e emoção.
+
+`context.json`
+: Análise semântica inicial da transcrição. Agrupa segmentos por tempo/assunto e atribui importância ao que estava acontecendo ao redor do highlight.
+
+`emotions.json`
+: Análise emocional inicial da transcrição. Registra surpresa, raiva, alegria, empolgação ou neutralidade por segmento.
 
 `action`
 : Ação de edição planejada para um short, como `zoom` ou `sfx`.
@@ -109,6 +115,8 @@ Após uma execução completa, o projeto pode gerar:
 cache/audio/
 cache/transcripts/
 cache/highlights/highlights.json
+cache/context/context.json
+cache/emotions/emotions.json
 cache/edit_plans/edit_plan.json
 output/subtitles/
 output/shorts/

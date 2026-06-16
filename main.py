@@ -4,6 +4,7 @@ from src.audio.extractor import extract_audio_from_video
 from src.config.paths import ensure_project_dirs
 from src.editing.long_video_builder import render_long_videos_from_edit_plan
 from src.editing.shorts_builder import render_shorts_from_edit_plan
+from src.emotion.emotion_analyzer import analyze_emotions
 from src.config.settings import APP_ENV, APP_NAME
 from src.highlights.detector import detect_highlights
 from src.planning.edit_planner import generate_edit_plan
@@ -16,6 +17,7 @@ from src.utils.logger import get_logger
 from src.video.metadata import get_video_metadata
 from src.video.reader import get_first_input_video
 from src.video.validator import validate_video_file
+from src.context.context_analyser import analyze_context
 
 
 logger = get_logger(__name__)
@@ -66,9 +68,20 @@ def main() -> None:
     )
     logger.info("Detecção de highlights concluída: %s", format_project_path(highlights_path))
 
+    context_path = analyze_context(transcript_path)
+    logger.info("Contexto pronto: %s", format_project_path(context_path))
+
+    emotions_path = analyze_emotions(
+        transcript_path=transcript_path,
+        audio_path=audio_path,
+    )
+    logger.info("Emoções prontas: %s", format_project_path(emotions_path))
+
     edit_plan_path = generate_edit_plan(
         source_video=validated_video,
         highlights_path=highlights_path,
+        context_path=context_path,
+        emotions_path=emotions_path,
     )
     logger.info("Edit plan pronto: %s", format_project_path(edit_plan_path))
 
@@ -85,7 +98,7 @@ def main() -> None:
         logger.info("Vídeo longo pronto: %s", format_project_path(video_path))
 
     logger.info("Transcrição Concluida")
-    logger.info("Fase 11 concluída com sucesso")
+    logger.info("Fase 13 concluída com sucesso")
 
 
 if __name__ == "__main__":

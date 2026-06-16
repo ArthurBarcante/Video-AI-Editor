@@ -39,16 +39,22 @@ cache/*
 !cache/transcripts/
 !cache/highlights/
 !cache/edit_plans/
+!cache/context/
+!cache/emotions/
 
 cache/audio/*
 cache/transcripts/*
 cache/highlights/*
 cache/edit_plans/*
+cache/context/*
+cache/emotions/*
 
 !cache/audio/.gitkeep
 !cache/transcripts/.gitkeep
 !cache/highlights/.gitkeep
 !cache/edit_plans/.gitkeep
+!cache/context/.gitkeep
+!cache/emotions/.gitkeep
 
 # Vídeos de entrada
 

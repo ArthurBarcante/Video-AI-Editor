@@ -15,6 +15,8 @@ segmentos transcritos
         ↓
 score de highlight
         ↓
+contexto + emoção
+        ↓
 priorização
         ↓
 plano de edição
@@ -203,6 +205,9 @@ Sinais que aumentam prioridade:
 * Palavras-chave.
 * Palavras como `clipa`, `não acredito`, `meu deus`, `caraca`.
 * Duração boa para corte.
+* Importância do bloco de contexto.
+* Emoções virais como surpresa, empolgação e alegria.
+* Raiva, com peso menor.
 
 Sinais que reduzem prioridade:
 
@@ -210,6 +215,109 @@ Sinais que reduzem prioridade:
 * Duração longa demais.
 
 Essa camada evita que o sistema dependa apenas do score bruto.
+
+## IA De Contexto
+
+Arquivos:
+
+```text
+src/context/context_analyser.py
+src/context/semantic_analyzer.py
+src/context/topic_grouper.py
+src/context/context_schema.py
+```
+
+A análise de contexto gera:
+
+```text
+cache/context/context.json
+```
+
+Ela agrupa segmentos próximos da transcrição para entender o que estava acontecendo ao redor de uma frase isolada.
+
+Cada bloco registra:
+
+```json
+{
+  "id": "context_001",
+  "start": 120.5,
+  "end": 184.2,
+  "duration": 63.7,
+  "text": "agora eu vou tentar passar desse boss...",
+  "keywords": ["boss", "morri"],
+  "topic": "progressão de gameplay",
+  "importance_score": 0.62,
+  "reasons": [
+    "termos relevantes detectados",
+    "tópico relevante: progressão de gameplay"
+  ]
+}
+```
+
+O `highlight_prioritizer.py` cruza o `start` do highlight com o intervalo do bloco. Quando há contexto, o sistema soma:
+
+```text
+importance_score * 0.25
+```
+
+Isso ajuda o projeto a escolher momentos que fazem parte de um assunto importante, mesmo que a frase isolada não pareça tão forte.
+
+## IA De Emoção
+
+Arquivos:
+
+```text
+src/emotion/emotion_analyzer.py
+src/emotion/emotion_rules.py
+src/emotion/emotion_schema.py
+```
+
+A análise emocional gera:
+
+```text
+cache/emotions/emotions.json
+```
+
+Ela detecta:
+
+Surpresa:
+: `não acredito`, `que isso`, `caraca`, `meu deus`, `nossa`, `impossível`.
+
+Raiva:
+: `droga`, `merda`, `porra`, `ódio`, `não dá`, `que raiva`.
+
+Alegria:
+: `boa`, `ganhei`, `consegui`, `vitória`, `kkkk`, `haha`, `muito bom`.
+
+Empolgação:
+: `vamos`, `bora`, `clipa`, `insano`, `absurdo`, `lendário`.
+
+O analisador combina emoção textual com intensidade de áudio. Se a fala tem emoção e áudio forte, o `emotion_score` sobe.
+
+Exemplo:
+
+```json
+{
+  "start": 120.5,
+  "end": 123.8,
+  "text": "mano, não acredito nisso!",
+  "emotion": "surprise",
+  "emotion_score": 0.78,
+  "audio_intensity": 0.72,
+  "reasons": [
+    "surpresa: não acredito",
+    "exclamação detectada",
+    "alta intensidade de áudio"
+  ]
+}
+```
+
+Na priorização:
+
+* `surprise`, `hype` e `joy` somam `emotion_score * 0.20`.
+* `anger` soma `emotion_score * 0.10`.
+
+Essa camada favorece momentos mais virais, porque reações emocionais costumam funcionar melhor em cortes curtos.
 
 ## Motor De Decisão
 

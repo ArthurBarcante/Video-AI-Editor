@@ -19,6 +19,10 @@ output/subtitles/
     ↓
 cache/highlights/highlights.json
     ↓
+cache/context/context.json
+    ↓
+cache/emotions/emotions.json
+    ↓
 cache/edit_plans/edit_plan.json
     ↓
 output/shorts/
@@ -178,6 +182,8 @@ Cada segmento vira base para:
 
 * Legendas.
 * Highlights.
+* Contexto.
+* Emoções.
 * Planejamento de cortes.
 
 ## 7. Geração De Legendas
@@ -236,7 +242,62 @@ O detector percorre cada segmento transcrito e calcula sinais:
 
 Se o score passa de `HIGHLIGHT_MIN_SCORE`, o segmento vira highlight.
 
-## 9. Priorização Dos Highlights
+## 9. Análise De Contexto
+
+Arquivo responsável:
+
+```text
+src/context/context_analyser.py
+```
+
+Entrada:
+
+```text
+cache/transcripts/live_transcript.json
+```
+
+Saída:
+
+```text
+cache/context/context.json
+```
+
+O sistema agrupa segmentos próximos da transcrição em blocos maiores. Depois extrai palavras relevantes, infere um tópico e calcula `importance_score`.
+
+Essa etapa permite que um highlight seja avaliado pelo que estava acontecendo ao redor, e não só pela frase isolada.
+
+## 10. Análise De Emoção
+
+Arquivo responsável:
+
+```text
+src/emotion/emotion_analyzer.py
+```
+
+Entradas:
+
+```text
+cache/transcripts/live_transcript.json
+cache/audio/live.wav
+```
+
+Saída:
+
+```text
+cache/emotions/emotions.json
+```
+
+O sistema detecta emoções por texto e intensidade de áudio:
+
+* Surpresa.
+* Raiva.
+* Alegria.
+* Empolgação.
+* Neutralidade.
+
+Essa etapa cria uma base para escolher momentos com mais potencial viral.
+
+## 11. Priorização Dos Highlights
 
 Arquivo responsável:
 
@@ -253,10 +314,12 @@ Por isso o sistema calcula `priority_score`, que ajusta o score original com sin
 * Exclamação.
 * Palavra-chave.
 * Duração boa.
+* Importância do contexto.
+* Emoção detectada.
 
 Esse score ajuda a escolher os cortes mais fortes primeiro.
 
-## 10. Plano De Edição
+## 12. Plano De Edição
 
 Arquivo responsável:
 
@@ -268,6 +331,8 @@ Entrada:
 
 ```text
 cache/highlights/highlights.json
+cache/context/context.json
+cache/emotions/emotions.json
 ```
 
 Saída:
@@ -288,7 +353,7 @@ Estrutura macro:
 }
 ```
 
-## 11. Planejamento De Shorts
+## 13. Planejamento De Shorts
 
 Arquivo responsável:
 
@@ -329,7 +394,7 @@ Exemplo:
 }
 ```
 
-## 12. Planejamento Do Vídeo Longo
+## 14. Planejamento Do Vídeo Longo
 
 Arquivo responsável:
 
@@ -358,7 +423,7 @@ Saída:
 }
 ```
 
-## 13. Motor De Decisão
+## 15. Motor De Decisão
 
 Arquivo responsável:
 
@@ -383,7 +448,7 @@ Ações atuais:
 `sfx`
 : Usado para adicionar sons curtos como `pop`, `impact` ou `laugh`.
 
-## 14. Renderização Dos Shorts
+## 16. Renderização Dos Shorts
 
 Arquivo responsável:
 
@@ -411,7 +476,7 @@ O builder:
 4. Mistura SFX no áudio se o asset existir.
 5. Exporta em H.264/AAC.
 
-## 15. Verticalização
+## 17. Verticalização
 
 Arquivo responsável:
 
@@ -441,7 +506,7 @@ fundo blur
 
 Essa estratégia evita cortar informação importante do gameplay.
 
-## 16. Renderização Do Vídeo Longo
+## 18. Renderização Do Vídeo Longo
 
 Arquivo responsável:
 
@@ -469,7 +534,7 @@ O builder:
 4. Junta tudo com FFmpeg.
 5. Remove temporários.
 
-## 17. Cache
+## 19. Cache
 
 O projeto usa cache para evitar retrabalho.
 
@@ -480,6 +545,8 @@ Exemplos:
 * Áudio já extraído.
 * Transcrição já feita.
 * Highlights já detectados.
+* Contexto já analisado.
+* Emoções já analisadas.
 * Plano já gerado.
 * Shorts já renderizados.
 * Verticais já renderizados.
@@ -487,12 +554,14 @@ Exemplos:
 
 Para forçar nova execução, apague o arquivo desejado ou use funções com `force=True` em testes/código.
 
-## 18. Resultado Final
+## 20. Resultado Final
 
 Depois do pipeline, os principais arquivos são:
 
 ```text
 cache/highlights/highlights.json
+cache/context/context.json
+cache/emotions/emotions.json
 cache/edit_plans/edit_plan.json
 output/subtitles/
 output/shorts/
@@ -502,7 +571,7 @@ output/long/
 
 O `edit_plan.json` é o melhor ponto para auditar se a lógica tomou boas decisões antes de olhar os vídeos finais.
 
-## 19. Onde Ajustar Comportamento
+## 21. Onde Ajustar Comportamento
 
 Mais ou menos highlights:
 : Ajustar `HIGHLIGHT_MIN_SCORE` no `.env`.
@@ -521,6 +590,12 @@ Regras de highlight:
 
 Priorização:
 : Editar `src/planning/highlight_prioritizer.py`.
+
+Contexto:
+: Editar `src/context/semantic_analyzer.py` e `src/context/topic_grouper.py`.
+
+Emoção:
+: Editar `src/emotion/emotion_rules.py` e `src/emotion/emotion_analyzer.py`.
 
 Ações automáticas:
 : Editar `src/planning/decision_engine.py`.
