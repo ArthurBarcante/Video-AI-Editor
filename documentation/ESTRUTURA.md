@@ -5,7 +5,7 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 ## Raiz Do Projeto
 
 `main.py`
-: Ponto de entrada do pipeline. Ele chama as etapas em ordem: localizar vídeo, validar, extrair áudio, transcrever, gerar legendas, detectar highlights, analisar contexto, analisar emoções, gerar plano de edição, renderizar shorts, verticalizar shorts e renderizar vídeo longo.
+: Ponto de entrada do pipeline. Ele chama as etapas em ordem: localizar vídeo, validar, extrair áudio, transcrever, gerar legendas, detectar highlights, analisar contexto, analisar emoções, gerar plano de edição, gerar títulos, gerar thumbnails, renderizar shorts, verticalizar shorts, renderizar vídeo longo e gerar o plano de publicação.
 
 `README.md`
 : Glossário das documentações e guia para rodar ou atualizar o projeto em outro computador.
@@ -51,6 +51,12 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 `cache/emotions/`
 : Recebe `emotions.json`, com emoção, score emocional e intensidade de áudio por segmento.
 
+`cache/titles/`
+: Recebe `titles.json`, com sugestões automáticas de títulos para shorts e vídeos longos.
+
+`cache/publishing/`
+: Recebe `publish_plan.json`, com metadados seguros de publicação para os vídeos finais.
+
 `cache/edit_plans/`
 : Recebe `edit_plan.json`, que descreve como os vídeos serão montados.
 
@@ -87,6 +93,9 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 `output/subtitles/`
 : Legendas `.srt` e `.ass`.
 
+`output/thumbnails/`
+: Miniaturas `.jpg` geradas automaticamente para shorts e vídeos longos. Também guarda frames intermediários em `output/thumbnails/frames/`.
+
 ## Documentação
 
 `documentation/ROADMAP.md`
@@ -95,11 +104,8 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 `documentation/ESTRUTURA.md`
 : Este documento. Explica a arquitetura física do repositório.
 
-`documentation/EXPLICAÇÕES/IA.md`
-: Explica a IA, as heurísticas e as regras de decisão.
-
-`documentation/EXPLICAÇÕES/LÓGICAS.md`
-: Explica o fluxo macro do sistema.
+`documentation/PROCESSOS/`
+: Pasta com uma documentação operacional para cada etapa do pipeline, de validação do vídeo até plano de publicação.
 
 ## Código Fonte
 
@@ -242,6 +248,57 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 
 `src/effects/sfx_effects.py`
 : Mapeia a biblioteca de SFX e resolve arquivos como `pop`, `impact`, `laugh` e `suspense`.
+
+### `src/titles/`
+
+`src/titles/__init__.py`
+: Marca o módulo de títulos como pacote.
+
+`src/titles/title_generator.py`
+: Gera `cache/titles/titles.json` a partir do plano de edição, contexto e emoções.
+
+`src/titles/title_rules.py`
+: Define regras de limpeza, variações e score inicial de CTR para títulos.
+
+`src/titles/title_schema.py`
+: Define os schemas Pydantic da análise de títulos.
+
+### `src/thumbnails/`
+
+`src/thumbnails/__init__.py`
+: Marca o módulo de thumbnails como pacote.
+
+`src/thumbnails/frame_capture.py`
+: Captura frames com FFmpeg em timestamps definidos pelo plano de edição.
+
+`src/thumbnails/thumbnail_selector.py`
+: Seleciona timestamps e ordena candidatos de thumbnails.
+
+`src/thumbnails/thumbnail_generator.py`
+: Cria thumbnails JPG, adiciona texto com Pillow e salva em `output/thumbnails/`.
+
+### `src/publishing/`
+
+`src/publishing/__init__.py`
+: Marca o módulo de publicação como pacote.
+
+`src/publishing/publish_schema.py`
+: Define os schemas Pydantic do plano de publicação.
+
+`src/publishing/publish_planner.py`
+: Gera `cache/publishing/publish_plan.json` a partir dos vídeos finais em `output/shorts/` e `output/long/`.
+
+`src/publishing/youtube_publisher.py`
+: Placeholder seguro para futura integração com YouTube.
+
+`src/publishing/tiktok_publisher.py`
+: Placeholder seguro para futura integração com TikTok.
+
+`src/publishing/instagram_publisher.py`
+: Placeholder seguro para futura integração com Instagram.
+
+`src/publishing/scheduler.py`
+: Placeholder seguro para futuro agendamento real de publicações.
 
 ### `src/editing/`
 

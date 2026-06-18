@@ -12,11 +12,8 @@ Este `README.md` funciona como glossário das documentações do projeto e como 
 `documentation/ESTRUTURA.md`
 : Explica a estrutura do repositório em detalhes. Mostra o papel de cada pasta, página e arquivo importante do projeto.
 
-`documentation/EXPLICAÇÕES/IA.md`
-: Registra como a IA do projeto funciona hoje. Explica as heurísticas de highlights, contexto, emoção, priorização, planejamento de cortes, ações automáticas, SFX e verticalização.
-
-`documentation/EXPLICAÇÕES/LÓGICAS.md`
-: Explica o fluxo macro do sistema. É o melhor arquivo para entender como o `main.py` orquestra as etapas de entrada, análise, planejamento e renderização.
+`documentation/PROCESSOS/`
+: Documenta cada processo do pipeline separadamente, com entradas, saídas, arquivos responsáveis, cache, tempo observado, gargalos e pontos de otimização.
 
 ## Glossário Técnico Rápido
 
@@ -49,6 +46,15 @@ Este `README.md` funciona como glossário das documentações do projeto e como 
 
 `emotions.json`
 : Análise emocional inicial da transcrição. Registra surpresa, raiva, alegria, empolgação ou neutralidade por segmento.
+
+`titles.json`
+: Sugestões automáticas de títulos para shorts e vídeos longos, com score inicial de CTR.
+
+`publish_plan.json`
+: Plano seguro de publicação. Lista os vídeos finais, títulos, descrições, tags, privacidade e status pendente, sem publicar de verdade nas plataformas.
+
+`output/thumbnails/`
+: Miniaturas JPG geradas automaticamente a partir dos frames do vídeo e com texto aplicado.
 
 `action`
 : Ação de edição planejada para um short, como `zoom` ou `sfx`.
@@ -118,8 +124,11 @@ cache/highlights/highlights.json
 cache/context/context.json
 cache/emotions/emotions.json
 cache/edit_plans/edit_plan.json
+cache/titles/titles.json
+cache/publishing/publish_plan.json
 output/subtitles/
 output/shorts/
+output/thumbnails/
 output/long/
 output/vertical/
 ```

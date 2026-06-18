@@ -11,11 +11,14 @@ from src.config.paths import (
     CACHE_EMOTIONS_DIR,
     CACHE_EDIT_PLANS_DIR,
     CACHE_HIGHLIGHTS_DIR,
+    CACHE_PUBLISH_DIR,
+    CACHE_TITLES_DIR,
     CACHE_TRANSCRIPTS_DIR,
     INPUT_DIR,
     OUTPUT_LONG_DIR,
     OUTPUT_SHORTS_DIR,
     OUTPUT_SUBTITLES_DIR,
+    OUTPUT_THUMBNAILS_DIR,
     OUTPUT_VERTICAL_DIR,
     ROOT_DIR,
 )
@@ -31,7 +34,13 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     emotions_output = CACHE_EMOTIONS_DIR / "emotions.json"
     highlights_output = CACHE_HIGHLIGHTS_DIR / "highlights.json"
     edit_plan_output = CACHE_EDIT_PLANS_DIR / "edit_plan.json"
+    titles_output = CACHE_TITLES_DIR / "titles.json"
+    publish_plan_output = CACHE_PUBLISH_DIR / "publish_plan.json"
     short_output = OUTPUT_SHORTS_DIR / "short_01.mp4"
+    short_thumbnail_output = OUTPUT_THUMBNAILS_DIR / "short_01.jpg"
+    short_thumbnail_frame = OUTPUT_THUMBNAILS_DIR / "frames" / "short_01_frame.jpg"
+    long_thumbnail_output = OUTPUT_THUMBNAILS_DIR / "video_01.jpg"
+    long_thumbnail_frame = OUTPUT_THUMBNAILS_DIR / "frames" / "video_01_frame.jpg"
     vertical_output = OUTPUT_VERTICAL_DIR / "short_01_vertical.mp4"
     long_video_output = OUTPUT_LONG_DIR / "video_01.mp4"
     srt_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.srt"
@@ -59,6 +68,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     previous_edit_plan = (
         edit_plan_output.read_text(encoding="utf-8") if edit_plan_output.exists() else None
     )
+    previous_titles = (
+        titles_output.read_text(encoding="utf-8") if titles_output.exists() else None
+    )
+    previous_publish_plan = (
+        publish_plan_output.read_text(encoding="utf-8")
+        if publish_plan_output.exists()
+        else None
+    )
     previous_context = (
         context_output.read_text(encoding="utf-8") if context_output.exists() else None
     )
@@ -66,6 +83,26 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         emotions_output.read_text(encoding="utf-8") if emotions_output.exists() else None
     )
     previous_short = short_output.read_bytes() if short_output.exists() else None
+    previous_short_thumbnail = (
+        short_thumbnail_output.read_bytes()
+        if short_thumbnail_output.exists()
+        else None
+    )
+    previous_short_thumbnail_frame = (
+        short_thumbnail_frame.read_bytes()
+        if short_thumbnail_frame.exists()
+        else None
+    )
+    previous_long_thumbnail = (
+        long_thumbnail_output.read_bytes()
+        if long_thumbnail_output.exists()
+        else None
+    )
+    previous_long_thumbnail_frame = (
+        long_thumbnail_frame.read_bytes()
+        if long_thumbnail_frame.exists()
+        else None
+    )
     previous_vertical = vertical_output.read_bytes() if vertical_output.exists() else None
     previous_long_video = (
         long_video_output.read_bytes() if long_video_output.exists() else None
@@ -74,7 +111,13 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     context_output.unlink(missing_ok=True)
     emotions_output.unlink(missing_ok=True)
     edit_plan_output.unlink(missing_ok=True)
+    titles_output.unlink(missing_ok=True)
+    publish_plan_output.unlink(missing_ok=True)
     short_output.unlink(missing_ok=True)
+    short_thumbnail_output.unlink(missing_ok=True)
+    short_thumbnail_frame.unlink(missing_ok=True)
+    long_thumbnail_output.unlink(missing_ok=True)
+    long_thumbnail_frame.unlink(missing_ok=True)
     vertical_output.unlink(missing_ok=True)
     long_video_output.unlink(missing_ok=True)
     short_ass_output.unlink(missing_ok=True)
@@ -120,6 +163,13 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Emoções prontas: cache/emotions/emotions.json",
             "Edit plan gerado: cache/edit_plans/edit_plan.json",
             "Edit plan pronto: cache/edit_plans/edit_plan.json",
+            "Sugestões de títulos geradas: 6",
+            "Títulos salvos em: cache/titles/titles.json",
+            "Títulos prontos: cache/titles/titles.json",
+            "Thumbnail gerada: output/thumbnails/short_01.jpg",
+            "Thumbnail gerada: output/thumbnails/video_01.jpg",
+            "Thumbnail pronta: output/thumbnails/short_01.jpg",
+            "Thumbnail pronta: output/thumbnails/video_01.jpg",
             "Short exportado: output/shorts/short_01.mp4",
             "Shorts renderizados: 1",
             "Short pronto: output/shorts/short_01.mp4",
@@ -129,8 +179,10 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Vídeo longo exportado: output/long/video_01.mp4",
             "Vídeos longos renderizados: 1",
             "Vídeo longo pronto: output/long/video_01.mp4",
+            "Publish plan gerado: cache/publishing/publish_plan.json",
+            "Plano de publicação pronto: cache/publishing/publish_plan.json",
             "Transcrição Concluida",
-            "Fase 13 concluída com sucesso",
+            "Fase 16 inicial concluída com sucesso",
         ]
 
         positions = [logs.index(message) for message in expected_order]
@@ -147,12 +199,24 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         assert context_output.stat().st_size > 0
         assert emotions_output.exists()
         assert emotions_output.stat().st_size > 0
+        assert titles_output.exists()
+        assert titles_output.stat().st_size > 0
+        assert short_thumbnail_output.exists()
+        assert short_thumbnail_output.stat().st_size > 0
+        assert short_thumbnail_frame.exists()
+        assert short_thumbnail_frame.stat().st_size > 0
+        assert long_thumbnail_output.exists()
+        assert long_thumbnail_output.stat().st_size > 0
+        assert long_thumbnail_frame.exists()
+        assert long_thumbnail_frame.stat().st_size > 0
         assert short_output.exists()
         assert short_output.stat().st_size > 0
         assert vertical_output.exists()
         assert vertical_output.stat().st_size > 0
         assert long_video_output.exists()
         assert long_video_output.stat().st_size > 0
+        assert publish_plan_output.exists()
+        assert publish_plan_output.stat().st_size > 0
         assert load_json(highlights_output) == [
             {
                 "start": 0.0,
@@ -263,6 +327,43 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
                 }
             ],
         }
+        assert load_json(titles_output)["suggestions"][:2] == [
+            {
+                "target_id": "short_01",
+                "target_type": "short",
+                "title": "EU NÃO ACREDITO QUE ISSO ACONTECEU",
+                "score": 0.8,
+                "reason": "gerado a partir do estilo intense",
+            },
+            {
+                "target_id": "short_01",
+                "target_type": "short",
+                "title": "MANO, NÃO ACREDITO NISSO!",
+                "score": 0.8,
+                "reason": "gerado a partir do estilo intense",
+            },
+        ]
+        publish_items = load_json(publish_plan_output)["items"]
+        assert {
+            "platform": "youtube_shorts",
+            "video_path": "output/shorts/short_01.mp4",
+            "title": "SHORT 01",
+            "description": "Short gerado automaticamente pelo Video AI Editor.",
+            "tags": ["shorts", "live", "gameplay"],
+            "scheduled_at": None,
+            "privacy_status": "private",
+            "status": "pending",
+        } in publish_items
+        assert {
+            "platform": "youtube",
+            "video_path": "output/long/video_01.mp4",
+            "title": "Melhores momentos da live",
+            "description": "Vídeo gerado automaticamente pelo Video AI Editor.",
+            "tags": ["gameplay", "live", "melhores momentos"],
+            "scheduled_at": None,
+            "privacy_status": "private",
+            "status": "pending",
+        } in publish_items
     finally:
         input_video.unlink(missing_ok=True)
         audio_output.unlink(missing_ok=True)
@@ -278,6 +379,14 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             edit_plan_output.unlink(missing_ok=True)
         else:
             edit_plan_output.write_text(previous_edit_plan, encoding="utf-8")
+        if previous_titles is None:
+            titles_output.unlink(missing_ok=True)
+        else:
+            titles_output.write_text(previous_titles, encoding="utf-8")
+        if previous_publish_plan is None:
+            publish_plan_output.unlink(missing_ok=True)
+        else:
+            publish_plan_output.write_text(previous_publish_plan, encoding="utf-8")
         if previous_context is None:
             context_output.unlink(missing_ok=True)
         else:
@@ -291,6 +400,26 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         else:
             short_output.parent.mkdir(parents=True, exist_ok=True)
             short_output.write_bytes(previous_short)
+        if previous_short_thumbnail is None:
+            short_thumbnail_output.unlink(missing_ok=True)
+        else:
+            short_thumbnail_output.parent.mkdir(parents=True, exist_ok=True)
+            short_thumbnail_output.write_bytes(previous_short_thumbnail)
+        if previous_short_thumbnail_frame is None:
+            short_thumbnail_frame.unlink(missing_ok=True)
+        else:
+            short_thumbnail_frame.parent.mkdir(parents=True, exist_ok=True)
+            short_thumbnail_frame.write_bytes(previous_short_thumbnail_frame)
+        if previous_long_thumbnail is None:
+            long_thumbnail_output.unlink(missing_ok=True)
+        else:
+            long_thumbnail_output.parent.mkdir(parents=True, exist_ok=True)
+            long_thumbnail_output.write_bytes(previous_long_thumbnail)
+        if previous_long_thumbnail_frame is None:
+            long_thumbnail_frame.unlink(missing_ok=True)
+        else:
+            long_thumbnail_frame.parent.mkdir(parents=True, exist_ok=True)
+            long_thumbnail_frame.write_bytes(previous_long_thumbnail_frame)
         if previous_vertical is None:
             vertical_output.unlink(missing_ok=True)
         else:

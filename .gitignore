@@ -41,6 +41,8 @@ cache/*
 !cache/edit_plans/
 !cache/context/
 !cache/emotions/
+!cache/titles/
+!cache/publishing/
 
 cache/audio/*
 cache/transcripts/*
@@ -48,6 +50,8 @@ cache/highlights/*
 cache/edit_plans/*
 cache/context/*
 cache/emotions/*
+cache/titles/*
+cache/publishing/*
 
 !cache/audio/.gitkeep
 !cache/transcripts/.gitkeep
@@ -55,6 +59,8 @@ cache/emotions/*
 !cache/edit_plans/.gitkeep
 !cache/context/.gitkeep
 !cache/emotions/.gitkeep
+!cache/titles/.gitkeep
+!cache/publishing/.gitkeep
 
 # Vídeos de entrada
 
@@ -78,16 +84,19 @@ output/*
 !output/shorts/
 !output/vertical/
 !output/subtitles/
+!output/thumbnails/
 
 output/long/*
 output/shorts/*
 output/vertical/*
 output/subtitles/*
+output/thumbnails/*
 
 !output/long/.gitkeep
 !output/shorts/.gitkeep
 !output/vertical/.gitkeep
 !output/subtitles/.gitkeep
+!output/thumbnails/.gitkeep
 
 # Assets gerados automaticamente
 

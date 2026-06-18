@@ -316,7 +316,7 @@ Melhor seleção de momentos virais.
 
 # Fase 14 — Títulos Automáticos
 
-Status: **Futuro**
+Status: **Concluído**
 
 Objetivo:
 
@@ -324,9 +324,9 @@ Criar títulos atrativos.
 
 ## Entregas
 
-* Geração automática de títulos. ()
-* Múltiplas sugestões. ()
-* Otimização para CTR. ()
+* Geração automática de títulos. (**Feito**)
+* Múltiplas sugestões. (**Feito**)
+* Otimização para CTR. (**Feito**)
 
 ## Resultado Esperado
 
@@ -336,7 +336,7 @@ Maior potencial de alcance.
 
 # Fase 15 — Geração de Thumbnails
 
-Status: **Futuro**
+Status: **Concluído**
 
 Objetivo:
 
@@ -344,10 +344,10 @@ Automatizar a criação de miniaturas.
 
 ## Entregas
 
-* Captura de frames. ()
-* Seleção de melhores imagens. ()
-* Inserção de texto. ()
-* Templates. ()
+* Captura de frames. (**Feito**)
+* Seleção de melhores imagens. (**Feito**)
+* Inserção de texto. (**Feito**)
+* Templates. (**Feito**)
 
 ## Resultado Esperado
 
@@ -357,14 +357,14 @@ Pipeline completo de produção.
 
 # Fase 16 — Publicação Automática
 
-Status: **Futuro**
-
+Status: **Desenvolvimento**
 Objetivo:
 
 Eliminar etapas manuais.
 
 ## Entregas
 
+* Plano seguro de publicação. (**Feito**)
 * Integração com YouTube. ()
 * Integração com TikTok. ()
 * Integração com Instagram. ()
@@ -372,13 +372,220 @@ Eliminar etapas manuais.
 
 ## Resultado Esperado
 
-Conteúdo publicado automaticamente.
+Conteúdo preparado para publicação automática, com upload real pendente de OAuth, permissões e revisão de app.
 
 ---
 
-# Fase 17 — Editor IA Completo
+# Processos do Sistema
 
-Status: **Visão Final**
+## Validação do vídeo
+- Tempo de Execução atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Extração de Áudio
+- Tempo de Execução Atual: < 30s
+### Otimizações e Melhorias
+- Prioridade: Média
+- 1. Medir tempo real da extração
+  - Impacto: alto para diagnóstico
+  - Risco: baixo
+- 2. Validar se WAV PCM ainda é o melhor formato intermediário
+  - Impacto: médio
+  - Risco: médio, análise de energia atual espera WAV
+- 3. Criar áudio separado por finalidade
+  - Impacto: baixo/médio
+  - Risco: médio
+- 4. Evitar releitura pesada do áudio em etapas seguintes
+  - Impacto: alto para análise de áudio em lives longas
+  - Risco médio
+- 5. Chunking do áudio
+  - Impacto: alto para robustez futura
+  - Risco: médio
+- 6. Usar -map explicitamente
+  - Impacto: baixo para performace, médio para confiabilidade
+  - Risco: baixo
+- 7. Adicionar validação do áudio extraído
+  - Impacto: médio para confiabilidade
+  - Risco: baixo
+- 8. Criar modo rápido de teste
+  - Impacto: alto em desenvolvimento
+  - Risco: baixo se limitado ao modo dev/test
+- 9. Cache com assinatura do vídeo
+  - Impacto: alto para segurança do cache
+  - Risco: médio, mexe em nomes e dependências
+
+## Transcrição
+- Tempo de Execução Atual: ~6min50s
+### Otimizações e Melhorias
+- Prioridade: Altíssima
+- 1. Desativar word_timestamps=True
+  - Impacto: alto
+  - Risco: baixo
+- 2. Adicionar métricas de performance da trasncrição
+  - Impacto: alto para decisão técnica
+  - Risco: baixo
+- 3. Criar perfis de transcrição
+  - Impacto: médio/alto
+  - Risco: baixo/médio
+- 4. Testar WHISPER_CPU_THREADS e WHISPER_NUM_WORKERS
+  - Impacto: médio
+  - Risco: baixo
+- 5. Ajustar VAD
+  - Impacto: médio, dependendo da live
+  - Risco: médio, VAD agressivo pode remover fala útilo
+- 6. Transcrição por chunks
+  - Impacto: alto para robustez
+  - Impacto em velocidade: médio inicialmente, alto se paralelizar
+  - Risco: médio, ajuste de timestamps e junção de chunks
+- 7. Evitar WAV gigante ou criar áudio otimizado para transcrição
+  - Impacto: médio em disco/I/O
+  - Risco: baixo/médio
+- 8. Salvar metadados da trasncrição
+  - Impacto: alto para análise
+  - Risco: baixo
+
+## Legendas
+- Tempo de Execução Atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Highlights
+- Tempo de Execução Atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Contexto
+- Tempo de Execução Atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Emoções
+- Tempo de Execução Atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Plano de Edição
+- Tempo de Execução Atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Títulos
+- Tempo de Execução Atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Thumbnails
+-  Tempo de Execução Atual: ~3s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+
+## Render dos Shorts
+- Tempo de Execução Atual: ~1min09s
+### Otimizações e Melhorias
+- Prioridade: Alta
+- 1. Medir tempo por short
+  - Impacto: alto para diagnóstico
+  - Risco: baixo
+- 2. Paralelizar render dos shorts
+  - Impacto: alto
+  - Risco: médio, uso intenso de CPU/disco
+- 3. Criar preset de render por perfil
+  - Impacto: alto
+  - Risco: baixo/médio, pode alterar qualidade/tamanho
+- 4. Gerar vertical direto no vídeo original
+  - Impacto: muito alto
+  - Risco: médio/alto, muda arquitetura do pipeline
+- 5. Só aplicar filtros quando necessário
+  - Impacto: alto para shorts simples
+  - Risco: médio, corte com -c copy pode não ser preciso dependendo de keyframes
+- 6. Melhorar posição do -ss
+  - Impacto: médio para qualidade/precisão
+  - Risco: baixo
+- 7. Otimizar SFX
+  - Impacto: médio
+  - Risco: baixo
+- 8. Zoom temporal real
+  - Impacto em qualidade: alto
+  - Impacto em performance: médio/negativo
+  - Risco: médio
+- Cache mais inteligente
+  - Impacto: alto para confiabilidade
+  - Risco: médio
+
+## Verticalização
+- Tempo de Execução Atual: ~1min40s
+### Otimizações e Melhorias
+- Prioridade: Alta
+- 1. Medir tempo por vertical
+  - Impacto: alto para diagnóstico
+  - Risco: baixo
+- 2. Paralelizar verticalização
+  - Impacto: alto
+  - Risco: médio, FFmpeg em paralelo pode saturar CPU
+- 3. Gerar vertical direto do vídeo original
+  - Impacto: muito alto
+  - Risco: médio/alto, junta responsabilidade shorts_builder e verticalizer
+- 4. Tornar o short horizontal opcional
+  - Impacto: alto
+  - Risco: médio
+- 5. Modo rápido com resolução reduzida
+  - Impacto: alto em desenvolvimento
+  - Risco: baixo
+- 6. Blur configurável
+  - Impacto: médio/alto
+  - Risco: baixo/médio, muda estética
+- 7. Usar preset configurável
+  - Impacto: médio
+  - Risco: baixo
+- 8. Evitar reencode de áudio
+  - Impacto: baixo/médio
+  - Risco: baixo, desde que o áudio de entrada seja compatível
+- 9. Cache com assinatura
+  - Impacto: alto para confiabilidade
+  - Risco: médio
+
+## Video Longo
+- Tempo de Execução Atual: ~2min27s
+### Otimizações e Melhorias
+- Prioridade: Alta
+
+## Plano de Publicação
+- Tempo de Execução Atual: < 1s
+### Otimizações e Melhorias
+- Prioridade: Baixa
+- 1. Medir tempo por segmento
+  - Impacto: alto para diagnóstico
+  - Risco: baixo
+- 2. Adicionar preset configurável
+  - Impacto: alto
+  - Risco: baixo/médio, variação de qualidade/tamanho
+- 3. Paralelizar cortes dos segmentos
+  - Impacto: alto
+  - Risco: médio, múltiplos FFmpeg simultâneos podem saturar CPU/disco
+- 4. Usar stream copy quando possível
+  - Impacto: muito alto
+  - Risco: médio/alto, precisão de corte
+- 5. Copiar áudio quando possível
+  - Impacto: baixo/médio
+  - Risco: baixo/médio
+- 6. Evitar temporários muito grandes
+  - Impacto: médio
+  - Risco: baixo/médio
+- 7. Melhorar planejamento antes de renderizar
+  - Impacto: alto para produto
+  - Risco: médio
+- 8. Criar relatório do vídeo longo
+  - Impacto: alto para análise
+  - Risco: baixo
+- 9. Cache com assinatura
+  - Impacto: alto para confiabilidade
+  - Risco: médio
+
+---
+# Editor IA Completo
+
+Status: **Desenvolvimento**
 
 Objetivo:
 
@@ -409,95 +616,3 @@ Arquivos prontos para postagem ()
 Sem necessidade de edição manual.
 
 ---
-
-# Fase 18 - Otimizar Edição para Funcionar com Brutos de Live
-
-Status: **Futuro**
-
-Objetivo:
-
-Melhorar tempo de edição e agilizar etapas
-
-## Entregas
-
-* Código limpo e otimizado. ()
-* Execução das tarefas em 40-60 min de uma live de 5-6 horas. ()
-* Shorts de 15 - 45 segundos completamente editados corretamente. ()
-* Vídeos de 20-30 min editados corretamente. ()
-
-## Resultado Esperado
-
-Rapidez e agilidade do script
-
----
-
----
-
-# Fase 19 — Legendas Geradas por Cortes
-
-Status: **Futuro**
-
-Objetivo:
-
-Melhorar edição de Shorts e otimizá-la
-
-## Entregas
-
-* Criação de .ass por shorts ()
-* Legendas separadas por corte ()
-
-## Resultado Esperado
-
-Legendas diferentes entre si para facilitar edição de shorts
-
----
-# Fase 20 - Zoom Temporal
-
-Status: **Futuro**
-
-Objetivo:
-
-Melhorar efeito de Zoom
-
-## Entregas
-
-* FFMpeg usando enable='between(t,start,end)' ()
-* Efeitos de zoom preciso ()
-
-## Resultado Esperado
-
-Zooms precisos e com intervalos de tempos claros
-
----
-
-# Fase 21 - Shorts Melhores
-
-Status: **Futuro**
-
-Objetivo:
-
-Melhorar visual dos shorts
-
-## Entregas
-
-* Modo blur_background. ()
-* Modo center_crop. ()
-* Modo top_gameplay_bottom_facecam. ()
-* Modo facecam_priority ()
-
-## Resultado Esperado
-
-Shorts variados com visuais diferentes dependendo do modo
-
----
-
-# Prioridade Atual
-
-As próximas etapas prioritárias são:
-
-1. Implementação da Inteligência Artificial Neural
-2. Geração Automática de Elementos (Thumbnail, Descrição e etc.)
-3. Publicação automática no Youtube
-4. Teste final e validações gerais do sistema
-
-Essas etapas formarão o núcleo da primeira versão funcional.

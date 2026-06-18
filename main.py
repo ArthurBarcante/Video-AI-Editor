@@ -2,22 +2,25 @@ from pathlib import Path
 
 from src.audio.extractor import extract_audio_from_video
 from src.config.paths import ensure_project_dirs
+from src.config.settings import APP_ENV, APP_NAME
+from src.context.context_analyser import analyze_context
 from src.editing.long_video_builder import render_long_videos_from_edit_plan
 from src.editing.shorts_builder import render_shorts_from_edit_plan
 from src.emotion.emotion_analyzer import analyze_emotions
-from src.config.settings import APP_ENV, APP_NAME
 from src.highlights.detector import detect_highlights
 from src.planning.edit_planner import generate_edit_plan
+from src.publishing.publish_planner import generate_publish_plan
 from src.rendering.verticalizer import verticalize_shorts
 from src.subtitles.ass_generator import generate_ass
 from src.subtitles.srt_generator import generate_srt
+from src.thumbnails.thumbnail_generator import generate_thumbnails_from_edit_plan
+from src.titles.title_generator import generate_titles
 from src.transcription.whisper_transcriber import transcribe_audio
 from src.utils.file_utils import format_project_path
 from src.utils.logger import get_logger
 from src.video.metadata import get_video_metadata
 from src.video.reader import get_first_input_video
 from src.video.validator import validate_video_file
-from src.context.context_analyser import analyze_context
 
 
 logger = get_logger(__name__)
@@ -85,6 +88,17 @@ def main() -> None:
     )
     logger.info("Edit plan pronto: %s", format_project_path(edit_plan_path))
 
+    titles_path = generate_titles(
+        edit_plan_path,
+        context_path=context_path,
+        emotions_path=emotions_path,
+    )
+    logger.info("Títulos prontos: %s", format_project_path(titles_path))
+
+    thumbnail_paths = generate_thumbnails_from_edit_plan(edit_plan_path)
+    for thumbnail_path in thumbnail_paths:
+        logger.info("Thumbnail pronta: %s", format_project_path(thumbnail_path))
+
     shorts_paths = render_shorts_from_edit_plan(edit_plan_path)
     for short_path in shorts_paths:
         logger.info("Short pronto: %s", format_project_path(short_path))
@@ -97,8 +111,11 @@ def main() -> None:
     for video_path in long_video_paths:
         logger.info("Vídeo longo pronto: %s", format_project_path(video_path))
 
+    publish_plan_path = generate_publish_plan()
+    logger.info("Plano de publicação pronto: %s", format_project_path(publish_plan_path))
+
     logger.info("Transcrição Concluida")
-    logger.info("Fase 13 concluída com sucesso")
+    logger.info("Fase 16 inicial concluída com sucesso")
 
 
 if __name__ == "__main__":
