@@ -12,6 +12,7 @@ from src.highlights.laugh_detector import (
     detect_text_laugh,
 )
 from src.highlights.scorer import score_highlight
+from src.utils.cache_metadata import is_cache_valid, save_cache_metadata
 from src.utils.file_utils import format_project_path, load_json, save_json
 from src.utils.logger import get_logger
 
@@ -33,7 +34,9 @@ def detect_highlights(
 
     output_path = Path(output_path)
 
-    if output_path.exists() and not force:
+    cache_sources = [transcript_path, audio_path]
+
+    if output_path.exists() and not force and is_cache_valid(output_path, cache_sources):
         logger.info("Highlights já existem em cache: %s", format_project_path(output_path))
         return output_path
 
@@ -86,6 +89,7 @@ def detect_highlights(
     highlights = sorted(highlights, key=lambda item: item["score"], reverse=True)
 
     save_json(highlights, output_path)
+    save_cache_metadata(output_path, cache_sources)
 
     logger.info("Highlights gerados: %s", len(highlights))
     logger.info("Arquivo salvo em: %s", format_project_path(output_path))

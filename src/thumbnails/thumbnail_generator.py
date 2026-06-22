@@ -6,6 +6,7 @@ from src.config.paths import OUTPUT_THUMBNAILS_DIR
 from src.rendering.ffmpeg_utils import ensure_safe_project_output_path
 from src.thumbnails.frame_capture import capture_frame
 from src.thumbnails.thumbnail_selector import select_thumbnail_timestamp
+from src.utils.cache_metadata import is_cache_valid, save_cache_metadata
 from src.utils.file_utils import format_project_path, load_json
 from src.utils.logger import get_logger
 
@@ -80,15 +81,17 @@ def generate_thumbnails_from_edit_plan(
     force: bool = False,
 ) -> list[Path]:
     edit_plan = load_json(edit_plan_path)
+    edit_plan_path = Path(edit_plan_path)
 
     source_video = edit_plan["source_video"]
+    cache_sources = [edit_plan_path, source_video]
     generated = []
 
     for short in edit_plan.get("shorts", []):
         output_path = OUTPUT_THUMBNAILS_DIR / f"{short['id']}.jpg"
         frame_path = OUTPUT_THUMBNAILS_DIR / "frames" / f"{short['id']}_frame.jpg"
 
-        if output_path.exists() and not force:
+        if output_path.exists() and not force and is_cache_valid(output_path, cache_sources):
             logger.info("Thumbnail já existe: %s", format_project_path(output_path))
             generated.append(output_path)
             continue
@@ -108,6 +111,7 @@ def generate_thumbnails_from_edit_plan(
         )
 
         generated.append(thumbnail_path)
+        save_cache_metadata(thumbnail_path, cache_sources)
         logger.info("Thumbnail gerada: %s", format_project_path(thumbnail_path))
 
     for video in edit_plan.get("long_videos", []):
@@ -118,7 +122,7 @@ def generate_thumbnails_from_edit_plan(
         output_path = OUTPUT_THUMBNAILS_DIR / f"{video['id']}.jpg"
         frame_path = OUTPUT_THUMBNAILS_DIR / "frames" / f"{video['id']}_frame.jpg"
 
-        if output_path.exists() and not force:
+        if output_path.exists() and not force and is_cache_valid(output_path, cache_sources):
             logger.info("Thumbnail já existe: %s", format_project_path(output_path))
             generated.append(output_path)
             continue
@@ -138,6 +142,7 @@ def generate_thumbnails_from_edit_plan(
         )
 
         generated.append(thumbnail_path)
+        save_cache_metadata(thumbnail_path, cache_sources)
         logger.info("Thumbnail gerada: %s", format_project_path(thumbnail_path))
 
     return generated

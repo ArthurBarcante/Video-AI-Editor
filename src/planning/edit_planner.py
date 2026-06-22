@@ -5,6 +5,7 @@ from src.planning.edit_plan_schema import EditPlan
 from src.planning.highlight_prioritizer import prioritize_highlights
 from src.planning.long_video_planner import plan_long_videos
 from src.planning.shorts_planner import plan_shorts
+from src.utils.cache_metadata import is_cache_valid, save_cache_metadata
 from src.utils.file_utils import format_project_path, load_json, save_json
 from src.utils.logger import get_logger
 
@@ -30,7 +31,14 @@ def generate_edit_plan(
 
     output_path = Path(output_path)
 
-    if output_path.exists() and not force:
+    cache_sources = [
+        source_video,
+        highlights_path,
+        *([context_path] if context_path else []),
+        *([emotions_path] if emotions_path else []),
+    ]
+
+    if output_path.exists() and not force and is_cache_valid(output_path, cache_sources):
         logger.info("Edit plan já existe em cache: %s", format_project_path(output_path))
         return output_path
 
@@ -62,6 +70,7 @@ def generate_edit_plan(
     )
 
     save_json(edit_plan.model_dump(exclude_none=True), output_path)
+    save_cache_metadata(output_path, cache_sources)
 
     logger.info("Edit plan gerado: %s", format_project_path(output_path))
     logger.info("Shorts planejados: %s", len(shorts))

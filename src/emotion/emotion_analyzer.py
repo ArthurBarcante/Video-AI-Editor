@@ -9,6 +9,7 @@ from src.highlights.audio_intensity import (
     read_wav_mono,
 )
 from src.rendering.ffmpeg_utils import ensure_safe_project_output_path
+from src.utils.cache_metadata import is_cache_valid, save_cache_metadata
 from src.utils.file_utils import format_project_path, load_json, save_json
 from src.utils.logger import get_logger
 
@@ -32,7 +33,9 @@ def analyze_emotions(
     ensure_safe_project_output_path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if output_path.exists() and not force:
+    cache_sources = [transcript_path, audio_path]
+
+    if output_path.exists() and not force and is_cache_valid(output_path, cache_sources):
         logger.info("Emoções já existem em cache: %s", format_project_path(output_path))
         return output_path
 
@@ -90,6 +93,7 @@ def analyze_emotions(
     )
 
     save_json(analysis.model_dump(), output_path)
+    save_cache_metadata(output_path, cache_sources)
 
     logger.info("Análise emocional salva em: %s", format_project_path(output_path))
 

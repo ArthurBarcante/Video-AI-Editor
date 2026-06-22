@@ -2,6 +2,7 @@ from pathlib import Path
 
 from src.config.paths import OUTPUT_SUBTITLES_DIR
 from src.rendering.ffmpeg_utils import ensure_safe_project_output_path
+from src.transcription.subtitle_cleaner import prepare_subtitle_segments
 from src.transcription.transcript_schema import Transcript
 from src.utils.file_utils import format_project_path, load_json
 from src.utils.logger import get_logger
@@ -33,7 +34,9 @@ def generate_srt(
 
     lines = []
 
-    for index, segment in enumerate(transcript.segments, start=1):
+    subtitle_segments = prepare_subtitle_segments(transcript.segments)
+
+    for index, segment in enumerate(subtitle_segments, start=1):
         start = seconds_to_srt_timestamp(segment.start)
         end = seconds_to_srt_timestamp(segment.end)
         text = segment.text

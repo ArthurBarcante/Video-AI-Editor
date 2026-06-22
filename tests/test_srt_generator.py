@@ -17,6 +17,20 @@ def write_transcript(path: Path) -> Path:
                 {"start": 1.5, "end": 3.2, "text": "Olá mundo"},
                 {"start": 3.2, "end": 4.0, "text": "Próxima fala"},
             ],
+            "metadata": {
+                "execution_time_seconds": 1.0,
+                "audio_duration_seconds": 3.2,
+                "realtime_speed": 3.2,
+                "segment_count": 2,
+                "model": "tiny",
+                "device": "cpu",
+                "compute_type": "int8",
+                "beam_size": 1,
+                "best_of": 1,
+                "vad_filter": True,
+                "word_timestamps": False,
+                "profile": "fast",
+            },
         },
         path,
     )
@@ -32,7 +46,7 @@ def test_generate_srt_from_transcript_json(tmp_path: Path) -> None:
 
     assert srt_path == output_path
     assert "1\n00:00:01,500 --> 00:00:03,200\nOlá mundo" in content
-    assert "2\n00:00:03,200 --> 00:00:04,000\nPróxima fala" in content
+    assert "2\n00:00:03,200 --> 00:00:04,200\nPróxima fala" in content
 
 
 def test_generate_srt_rejects_project_root_output(tmp_path: Path) -> None:

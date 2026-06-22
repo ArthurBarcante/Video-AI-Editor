@@ -4,6 +4,7 @@ from src.config.paths import CACHE_TITLES_DIR
 from src.rendering.ffmpeg_utils import ensure_safe_project_output_path
 from src.titles.title_rules import generate_title_variants, score_title
 from src.titles.title_schema import TitleAnalysis, TitleSuggestion
+from src.utils.cache_metadata import is_cache_valid, save_cache_metadata
 from src.utils.file_utils import format_project_path, load_json, save_json
 from src.utils.logger import get_logger
 
@@ -35,7 +36,13 @@ def generate_titles(
     ensure_safe_project_output_path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    if output_path.exists() and not force:
+    cache_sources = [
+        edit_plan_path,
+        *([Path(context_path)] if context_path else []),
+        *([Path(emotions_path)] if emotions_path else []),
+    ]
+
+    if output_path.exists() and not force and is_cache_valid(output_path, cache_sources):
         logger.info("Títulos já existem em cache: %s", format_project_path(output_path))
         return output_path
 
@@ -89,6 +96,7 @@ def generate_titles(
     analysis = TitleAnalysis(suggestions=suggestions)
 
     save_json(analysis.model_dump(), output_path)
+    save_cache_metadata(output_path, cache_sources)
 
     logger.info("Sugestões de títulos geradas: %s", len(suggestions))
     logger.info("Títulos salvos em: %s", format_project_path(output_path))

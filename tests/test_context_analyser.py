@@ -56,6 +56,35 @@ def test_analyze_context_generates_context_json(tmp_path: Path) -> None:
     }
 
 
+def test_analyze_context_regenerates_when_transcript_changes(tmp_path: Path) -> None:
+    transcript_path = tmp_path / "cache" / "transcripts" / "live_transcript.json"
+    output_path = tmp_path / "cache" / "context" / "context.json"
+
+    save_json(
+        {
+            "segments": [
+                {"start": 0.0, "end": 10.0, "text": "primeiro boss"},
+            ],
+        },
+        transcript_path,
+    )
+    analyze_context(transcript_path, output_path=output_path)
+
+    save_json(
+        {
+            "segments": [
+                {"start": 0.0, "end": 10.0, "text": "segunda estratégia"},
+            ],
+        },
+        transcript_path,
+    )
+    analyze_context(transcript_path, output_path=output_path)
+
+    context = load_json(output_path)
+
+    assert context["blocks"][0]["text"] == "segunda estratégia"
+
+
 def test_group_segments_into_blocks_splits_by_gap() -> None:
     blocks = group_segments_into_blocks(
         [

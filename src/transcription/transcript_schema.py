@@ -20,6 +20,27 @@ class TranscriptSegment(BaseModel):
         return " ".join(value.split())
 
 
+class TranscriptMetadata(BaseModel):
+    execution_time_seconds: float
+    audio_duration_seconds: float | None = None
+    realtime_speed: float
+    segment_count: int
+    model: str
+    device: str
+    compute_type: str
+    beam_size: int
+    best_of: int
+    vad_filter: bool
+    word_timestamps: bool
+    profile: str
+    chunking_enabled: bool = False
+    chunk_duration: int | None = None
+    chunk_overlap: int | None = None
+    chunk_count: int = 0
+    chunks_reused_from_cache: int = 0
+    chunk_metrics: list[dict] = Field(default_factory=list)
+
+
 class Transcript(BaseModel):
     model_config = ConfigDict(str_strip_whitespace=True)
 
@@ -27,3 +48,4 @@ class Transcript(BaseModel):
     language: str | None = None
     duration: float | None = Field(default=None, ge=0)
     segments: list[TranscriptSegment]
+    metadata: TranscriptMetadata

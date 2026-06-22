@@ -119,7 +119,10 @@ Após uma execução completa, o projeto pode gerar:
 
 ```text
 cache/audio/
+cache/audio/chunks/
+cache/metadata/
 cache/transcripts/
+cache/transcripts/chunks/
 cache/highlights/highlights.json
 cache/context/context.json
 cache/emotions/emotions.json

@@ -2,11 +2,13 @@ from pathlib import Path
 
 from src.editing import long_video_builder
 from src.editing.long_video_builder import (
+    cut_segment,
     concat_segments,
     render_long_video,
     render_long_videos_from_edit_plan,
 )
-from src.utils.file_utils import save_json
+from src.utils.cache_metadata import save_cache_metadata
+from src.utils.file_utils import load_json, save_json
 
 
 def test_render_long_video_cuts_segments_and_concats(
@@ -20,6 +22,7 @@ def test_render_long_video_cuts_segments_and_concats(
         calls.append(command)
         Path(command[-1]).write_bytes(b"video")
 
+    monkeypatch.setattr(long_video_builder, "LONG_RENDER_PARALLEL", False)
     monkeypatch.setattr(long_video_builder, "run_command", fake_run_command)
 
     output_path = render_long_video(
@@ -58,6 +61,16 @@ def test_render_long_video_cuts_segments_and_concats(
     ]
     assert calls[2][:7] == ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i"]
 
+    report = load_json(output_dir / "video_01.json")
+    assert report["id"] == "video_01"
+    assert report["segment_count"] == 2
+    assert report["render_profile"] == "fast"
+    assert report["parallel"] is False
+    assert report["audio_copy"] is False
+    assert report["total_execution_time_seconds"] >= 0
+    assert report["segments"][0]["id"] == "segment_001"
+    assert report["segments"][0]["end"] == 22.0
+
 
 def test_concat_segments_removes_concat_file(
     monkeypatch,
@@ -76,6 +89,41 @@ def test_concat_segments_removes_concat_file(
 
     assert output_path.read_bytes() == b"long"
     assert not (output_path.parent / "video_01_concat.txt").exists()
+
+
+def test_cut_segment_uses_render_profile_and_audio_copy(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    calls = []
+    output_path = tmp_path / "segment_001.mp4"
+
+    def fake_run_command(command: list[str]) -> None:
+        calls.append(command)
+        Path(command[-1]).write_bytes(b"video")
+
+    monkeypatch.setattr(long_video_builder, "LONG_AUDIO_COPY", True)
+    monkeypatch.setattr(long_video_builder, "run_command", fake_run_command)
+
+    result = cut_segment(
+        source_video="input/live_bruta.mp4",
+        segment={
+            "id": "segment_001",
+            "start": 10.0,
+            "end": 20.0,
+            "duration": 10.0,
+        },
+        output_path=output_path,
+    )
+
+    assert result["path"] == output_path
+    assert result["segment_id"] == "segment_001"
+    assert result["execution_time_seconds"] >= 0
+    assert "-preset" in calls[0]
+    assert "veryfast" in calls[0]
+    assert "-crf" in calls[0]
+    assert "28" in calls[0]
+    assert calls[0][calls[0].index("-c:a") + 1] == "copy"
 
 
 def test_render_long_videos_from_edit_plan_uses_cache_without_force(
@@ -102,6 +150,7 @@ def test_render_long_videos_from_edit_plan_uses_cache_without_force(
         },
         edit_plan_path,
     )
+    save_cache_metadata(existing_video, [edit_plan_path, "input/live_bruta.mp4"])
 
     monkeypatch.setattr(long_video_builder, "OUTPUT_LONG_DIR", output_dir)
     monkeypatch.setattr(long_video_builder, "run_command", lambda command: calls.append(command))

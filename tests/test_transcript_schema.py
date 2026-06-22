@@ -17,6 +17,20 @@ def test_transcript_schema_accepts_expected_structure() -> None:
                     "text": " texto transcrito ",
                 }
             ],
+            "metadata": {
+                "execution_time_seconds": 1.0,
+                "audio_duration_seconds": 1.0,
+                "realtime_speed": 1.0,
+                "segment_count": 1,
+                "model": "tiny",
+                "device": "cpu",
+                "compute_type": "int8",
+                "beam_size": 1,
+                "best_of": 1,
+                "vad_filter": True,
+                "word_timestamps": False,
+                "profile": "fast",
+            },
         }
     )
 
@@ -24,6 +38,7 @@ def test_transcript_schema_accepts_expected_structure() -> None:
     assert transcript.language == "pt"
     assert transcript.duration == 1.0
     assert transcript.segments[0].text == "texto transcrito"
+    assert transcript.metadata.profile == "fast"
 
 
 def test_transcript_segment_rejects_end_before_start() -> None:

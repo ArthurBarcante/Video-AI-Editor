@@ -5,12 +5,14 @@ from pathlib import Path
 
 import pytest
 
+from src.audio.cache_signature import build_video_cache_signature
 from src.config.paths import (
     CACHE_AUDIO_DIR,
     CACHE_CONTEXT_DIR,
     CACHE_EMOTIONS_DIR,
     CACHE_EDIT_PLANS_DIR,
     CACHE_HIGHLIGHTS_DIR,
+    CACHE_METADATA_DIR,
     CACHE_PUBLISH_DIR,
     CACHE_TITLES_DIR,
     CACHE_TRANSCRIPTS_DIR,
@@ -28,8 +30,9 @@ from src.utils.file_utils import load_json, save_json
 def test_python_main_runs_through_highlights_in_expected_order(sample_video: Path) -> None:
     INPUT_DIR.mkdir(parents=True, exist_ok=True)
     input_video = INPUT_DIR / "000_pytest_phase3.mp4"
-    audio_output = CACHE_AUDIO_DIR / "000_pytest_phase3.wav"
-    transcript_output = CACHE_TRANSCRIPTS_DIR / "000_pytest_phase3_transcript.json"
+    validation_metadata_output = (
+        CACHE_METADATA_DIR / "000_pytest_phase3_validation_metadata.json"
+    )
     context_output = CACHE_CONTEXT_DIR / "context.json"
     emotions_output = CACHE_EMOTIONS_DIR / "emotions.json"
     highlights_output = CACHE_HIGHLIGHTS_DIR / "highlights.json"
@@ -43,22 +46,42 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     long_thumbnail_frame = OUTPUT_THUMBNAILS_DIR / "frames" / "video_01_frame.jpg"
     vertical_output = OUTPUT_VERTICAL_DIR / "short_01_vertical.mp4"
     long_video_output = OUTPUT_LONG_DIR / "video_01.mp4"
-    srt_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript.srt"
-    short_ass_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript_short.ass"
-    long_ass_output = OUTPUT_SUBTITLES_DIR / "000_pytest_phase3_transcript_long.ass"
 
     if input_video.exists():
         pytest.skip(f"Arquivo de teste já existe: {input_video}")
 
     shutil.copyfile(sample_video, input_video)
+    audio_signature = build_video_cache_signature(input_video)
+    audio_stem = f"000_pytest_phase3_{audio_signature}"
+    audio_output = CACHE_AUDIO_DIR / f"{audio_stem}.wav"
+    audio_metadata_output = CACHE_AUDIO_DIR / f"{audio_stem}_audio_metadata.json"
+    audio_chunks_dir = CACHE_AUDIO_DIR / "chunks" / audio_stem
+    transcript_output = CACHE_TRANSCRIPTS_DIR / f"{audio_stem}_transcript.json"
+    srt_output = OUTPUT_SUBTITLES_DIR / f"{audio_stem}_transcript.srt"
+    short_ass_output = OUTPUT_SUBTITLES_DIR / f"{audio_stem}_transcript_short.ass"
+    long_ass_output = OUTPUT_SUBTITLES_DIR / f"{audio_stem}_transcript_long.ass"
     save_json(
         {
-            "source_audio": "cache/audio/000_pytest_phase3.wav",
+            "source_audio": f"cache/audio/{audio_stem}.wav",
             "language": "pt",
             "duration": 1.0,
             "segments": [
                 {"start": 0.0, "end": 3.0, "text": "mano, não acredito nisso!"},
             ],
+            "metadata": {
+                "execution_time_seconds": 1.0,
+                "audio_duration_seconds": 3.0,
+                "realtime_speed": 3.0,
+                "segment_count": 1,
+                "model": "tiny",
+                "device": "cpu",
+                "compute_type": "int8",
+                "beam_size": 1,
+                "best_of": 1,
+                "vad_filter": True,
+                "word_timestamps": False,
+                "profile": "fast",
+            },
         },
         transcript_output,
     )
@@ -120,6 +143,7 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
     long_thumbnail_frame.unlink(missing_ok=True)
     vertical_output.unlink(missing_ok=True)
     long_video_output.unlink(missing_ok=True)
+    validation_metadata_output.unlink(missing_ok=True)
     short_ass_output.unlink(missing_ok=True)
     long_ass_output.unlink(missing_ok=True)
 
@@ -141,17 +165,21 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Vídeo encontrado: input/000_pytest_phase3.mp4",
             "Vídeo validado com sucesso",
             "Metadados carregados",
-            "Áudio extraído: cache/audio/000_pytest_phase3.wav",
+            (
+                "Metadata da validação salva em: "
+                "cache/metadata/000_pytest_phase3_validation_metadata.json"
+            ),
+            f"Áudio extraído: cache/audio/{audio_stem}.wav",
             "Validação Concluida",
-            "Transcrição gerada: cache/transcripts/000_pytest_phase3_transcript.json",
-            "SRT gerado: output/subtitles/000_pytest_phase3_transcript.srt",
+            f"Transcrição gerada: cache/transcripts/{audio_stem}_transcript.json",
+            f"SRT gerado: output/subtitles/{audio_stem}_transcript.srt",
             (
                 "Legenda ASS para Shorts: "
-                "output/subtitles/000_pytest_phase3_transcript_short.ass"
+                f"output/subtitles/{audio_stem}_transcript_short.ass"
             ),
             (
                 "Legenda ASS para vídeo longo: "
-                "output/subtitles/000_pytest_phase3_transcript_long.ass"
+                f"output/subtitles/{audio_stem}_transcript_long.ass"
             ),
             "Highlights gerados: 1",
             "Arquivo salvo em: cache/highlights/highlights.json",
@@ -163,22 +191,18 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "Emoções prontas: cache/emotions/emotions.json",
             "Edit plan gerado: cache/edit_plans/edit_plan.json",
             "Edit plan pronto: cache/edit_plans/edit_plan.json",
-            "Sugestões de títulos geradas: 6",
+            "Sugestões de títulos geradas: 3",
             "Títulos salvos em: cache/titles/titles.json",
             "Títulos prontos: cache/titles/titles.json",
             "Thumbnail gerada: output/thumbnails/short_01.jpg",
-            "Thumbnail gerada: output/thumbnails/video_01.jpg",
             "Thumbnail pronta: output/thumbnails/short_01.jpg",
-            "Thumbnail pronta: output/thumbnails/video_01.jpg",
             "Short exportado: output/shorts/short_01.mp4",
             "Shorts renderizados: 1",
             "Short pronto: output/shorts/short_01.mp4",
             "Vídeo vertical gerado: output/vertical/short_01_vertical.mp4",
             "Shorts verticalizados: 1",
             "Short vertical pronto: output/vertical/short_01_vertical.mp4",
-            "Vídeo longo exportado: output/long/video_01.mp4",
-            "Vídeos longos renderizados: 1",
-            "Vídeo longo pronto: output/long/video_01.mp4",
+            "Vídeos longos renderizados: 0",
             "Publish plan gerado: cache/publishing/publish_plan.json",
             "Plano de publicação pronto: cache/publishing/publish_plan.json",
             "Transcrição Concluida",
@@ -189,6 +213,11 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         assert positions == sorted(positions)
         assert audio_output.exists()
         assert audio_output.stat().st_size > 0
+        assert audio_metadata_output.exists()
+        assert audio_metadata_output.stat().st_size > 0
+        assert audio_chunks_dir.exists()
+        assert validation_metadata_output.exists()
+        assert validation_metadata_output.stat().st_size > 0
         assert srt_output.exists()
         assert srt_output.stat().st_size > 0
         assert short_ass_output.exists()
@@ -205,16 +234,13 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         assert short_thumbnail_output.stat().st_size > 0
         assert short_thumbnail_frame.exists()
         assert short_thumbnail_frame.stat().st_size > 0
-        assert long_thumbnail_output.exists()
-        assert long_thumbnail_output.stat().st_size > 0
-        assert long_thumbnail_frame.exists()
-        assert long_thumbnail_frame.stat().st_size > 0
+        assert not long_thumbnail_output.exists()
+        assert not long_thumbnail_frame.exists()
         assert short_output.exists()
         assert short_output.stat().st_size > 0
         assert vertical_output.exists()
         assert vertical_output.stat().st_size > 0
-        assert long_video_output.exists()
-        assert long_video_output.stat().st_size > 0
+        assert not long_video_output.exists()
         assert publish_plan_output.exists()
         assert publish_plan_output.stat().st_size > 0
         assert load_json(highlights_output) == [
@@ -232,9 +258,25 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
                 ],
             }
         ]
+        validation_metadata = load_json(validation_metadata_output)
+        assert validation_metadata["file_name"] == "000_pytest_phase3.mp4"
+        assert validation_metadata["source_path"] == "input/000_pytest_phase3.mp4"
+        assert validation_metadata["duration"] > 0
+        assert validation_metadata["width"] == 160
+        assert validation_metadata["height"] == 120
+        assert validation_metadata["fps"] == 25.0
+        assert validation_metadata["codec"] == "h264"
+        assert validation_metadata["audio_codec"] == "aac"
+        assert validation_metadata["file_size_bytes"] > 0
+        assert validation_metadata["validated_at"]
+        audio_metadata = load_json(audio_metadata_output)
+        assert audio_metadata["cache_signature"] == audio_signature
+        assert audio_metadata["audio_path"] == f"cache/audio/{audio_stem}.wav"
+        assert audio_metadata["chunk_count"] >= 1
+        assert audio_metadata["chunks_metadata_path"]
         assert load_json(context_output) == {
             "source_transcript": (
-                "cache/transcripts/000_pytest_phase3_transcript.json"
+                f"cache/transcripts/{audio_stem}_transcript.json"
             ),
             "blocks": [
                 {
@@ -252,9 +294,9 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
         }
         assert load_json(emotions_output) == {
             "source_transcript": (
-                "cache/transcripts/000_pytest_phase3_transcript.json"
+                f"cache/transcripts/{audio_stem}_transcript.json"
             ),
-            "source_audio": "cache/audio/000_pytest_phase3.wav",
+            "source_audio": f"cache/audio/{audio_stem}.wav",
             "segments": [
                 {
                     "start": 0.0,
@@ -304,28 +346,7 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
                     ],
                 }
             ],
-            "long_videos": [
-                {
-                    "id": "video_01",
-                    "title": "Melhores momentos da live",
-                    "duration_target": 1200,
-                    "theme": "compilado curto de melhores momentos",
-                    "segments": [
-                        {
-                            "start": 0.0,
-                            "end": 11.0,
-                            "duration": 11.0,
-                            "score": 0.83,
-                            "reason": (
-                                "palavra-chave: mano, palavra-chave: não acredito, "
-                                "exclamação detectada, fala curta com potencial de corte, "
-                                "alta intensidade de áudio"
-                            ),
-                        }
-                    ],
-                    "actions": [],
-                }
-            ],
+            "long_videos": [],
         }
         assert load_json(titles_output)["suggestions"][:2] == [
             {
@@ -354,19 +375,13 @@ def test_python_main_runs_through_highlights_in_expected_order(sample_video: Pat
             "privacy_status": "private",
             "status": "pending",
         } in publish_items
-        assert {
-            "platform": "youtube",
-            "video_path": "output/long/video_01.mp4",
-            "title": "Melhores momentos da live",
-            "description": "Vídeo gerado automaticamente pelo Video AI Editor.",
-            "tags": ["gameplay", "live", "melhores momentos"],
-            "scheduled_at": None,
-            "privacy_status": "private",
-            "status": "pending",
-        } in publish_items
+        assert not any(item["platform"] == "youtube" for item in publish_items)
     finally:
         input_video.unlink(missing_ok=True)
         audio_output.unlink(missing_ok=True)
+        audio_metadata_output.unlink(missing_ok=True)
+        shutil.rmtree(audio_chunks_dir, ignore_errors=True)
+        validation_metadata_output.unlink(missing_ok=True)
         transcript_output.unlink(missing_ok=True)
         srt_output.unlink(missing_ok=True)
         short_ass_output.unlink(missing_ok=True)

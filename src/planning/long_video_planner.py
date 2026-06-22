@@ -7,6 +7,9 @@ from src.planning.decision_engine import should_be_long_segment
 from src.planning.edit_plan_schema import LongVideoPlan, LongVideoSegment
 
 
+MIN_LONG_VIDEO_EXPORT_DURATION = 60
+
+
 def expand_long_segment(start: float, end: float) -> tuple[float, float]:
     padding_before = 8
     padding_after = 8
@@ -72,6 +75,9 @@ def plan_long_videos(highlights: list[dict]) -> list[LongVideoPlan]:
         segments = plan_long_video_segments(highlights)
 
         total_duration = sum(segment.duration for segment in segments)
+
+        if total_duration < MIN_LONG_VIDEO_EXPORT_DURATION:
+            continue
 
         if total_duration < LONG_VIDEO_MIN_DURATION:
             title = "Melhores momentos da live"

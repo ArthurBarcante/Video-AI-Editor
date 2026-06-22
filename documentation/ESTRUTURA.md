@@ -39,8 +39,14 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 `cache/audio/`
 : Recebe o áudio `.wav` extraído da live.
 
+`cache/audio/chunks/`
+: Recebe chunks WAV derivados do áudio extraído, separados por duração e overlap.
+
 `cache/transcripts/`
 : Recebe a transcrição em JSON gerada pelo Whisper.
+
+`cache/transcripts/chunks/`
+: Guarda WAVs e JSONs parciais da transcrição por chunks, permitindo retomar lives longas sem retranscrever tudo.
 
 `cache/highlights/`
 : Recebe `highlights.json`, com trechos candidatos a cortes.
@@ -61,10 +67,19 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 : Recebe `edit_plan.json`, que descreve como os vídeos serão montados.
 
 `cache/metadata/`
-: Guarda metadados coletados dos vídeos quando usados.
+: Guarda metadados de validação dos vídeos processados.
 
 `cache/video/`
 : Área reservada para arquivos intermediários de vídeo.
+
+`cache/learning/`
+: Memória local de aprendizado, feedback, correções e preferências do editor.
+
+`cache/analytics/`
+: Métricas reais de vídeos publicados, relatórios de performance e padrões aprendidos.
+
+`data/analytics/`
+: Entrada manual de métricas publicadas antes da integração com APIs externas.
 
 `assets/`
 : Biblioteca de recursos externos usados na edição.
@@ -118,7 +133,13 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 : Marca o módulo de áudio como pacote.
 
 `src/audio/extractor.py`
-: Extrai áudio do vídeo com FFmpeg. Gera WAV mono em 16 kHz em `cache/audio/`, formato usado pela transcrição e análise de intensidade.
+: Extrai áudio do vídeo com FFmpeg. Gera WAV mono em 16 kHz em `cache/audio/`, com cache assinado pelo vídeo.
+
+`src/audio/cache_signature.py`
+: Gera assinatura rápida de cache baseada em tamanho e data de modificação do vídeo.
+
+`src/audio/chunker.py`
+: Divide o WAV extraído em chunks em `cache/audio/chunks/`.
 
 ### `src/config/`
 
@@ -142,13 +163,25 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 `src/video/metadata.py`
 : Usa FFprobe para obter duração, tamanho, codecs, resolução e FPS.
 
+`src/video/validation_metadata.py`
+: Salva a metadata de validação em `cache/metadata/`.
+
 `src/video/converter.py`
 : Contém utilidades de conversão de vídeo usadas por testes e futuras etapas de render.
 
 ### `src/transcription/`
 
 `src/transcription/whisper_transcriber.py`
-: Carrega o Faster Whisper, transcreve o áudio e salva a transcrição JSON em `cache/transcripts/`.
+: Coordena a transcrição cheia ou por chunks, carrega o Faster Whisper, salva cache parcial e gera o transcript final em `cache/transcripts/`.
+
+`src/transcription/chunking.py`
+: Cria ranges de chunks e corta o WAV em blocos menores com FFmpeg.
+
+`src/transcription/chunk_transcriber.py`
+: Transcreve um chunk, aplica offset de timestamp global e salva o JSON parcial do bloco.
+
+`src/transcription/chunk_merger.py`
+: Junta segmentos transcritos por chunks, ordena por tempo e remove duplicatas simples causadas por overlap.
 
 `src/transcription/transcript_schema.py`
 : Define os schemas Pydantic de transcrição e segmentos.
@@ -156,19 +189,36 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 `src/transcription/text_cleaner.py`
 : Normaliza textos transcritos antes de salvar os segmentos.
 
+`src/transcription/subtitle_cleaner.py`
+: Pós-processa textos para legenda, removendo hesitações simples, repetições excessivas, alongamentos e ajustando duração dos segmentos.
+
+`src/transcription/transcription_profiles.py`
+: Define perfis `fast`, `balanced` e `quality`, incluindo beam size, VAD e parâmetros de silêncio.
+
+### `scripts/`
+
+`scripts/benchmark_transcription.py`
+: Executa benchmarks manuais de transcrição variando `WHISPER_CPU_THREADS` e `WHISPER_NUM_WORKERS` em áudio curto.
+
 ### `src/subtitles/`
 
 `src/subtitles/srt_generator.py`
 : Gera legenda `.srt` simples a partir da transcrição.
 
 `src/subtitles/ass_generator.py`
-: Gera legendas `.ass` em modo `short` e `long`. O modo short usa texto maior, quebra curta e destaque de palavras importantes.
+: Gera legendas `.ass` globais em modo `short` e `long`.
+
+`src/subtitles/short_subtitle_generator.py`
+: Gera `.ass` individual para cada short planejado em `edit_plan.json`, com timestamps relativos ao corte.
+
+`src/subtitles/subtitle_segmenter.py`
+: Filtra segmentos por intervalo, desloca tempos para `0s` e divide falas longas em blocos curtos para shorts.
 
 `src/subtitles/line_breaker.py`
-: Quebra linhas de legenda para manter leitura confortável.
+: Quebra linhas de legenda com limite de caracteres, no máximo duas linhas e preferência por pontuação/conectores.
 
 `src/subtitles/word_highlighter.py`
-: Destaca palavras importantes em ASS com cor e negrito.
+: Módulo legado para destaque de palavras em ASS. Não é usado no fluxo atual para preservar performance e legibilidade.
 
 `src/subtitles/subtitle_renderer.py`
 : Área reservada para renderização de legendas diretamente no vídeo.
@@ -240,6 +290,43 @@ Este documento explica a organização do repositório e o papel de cada pasta e
 
 `src/planning/long_video_planner.py`
 : Seleciona highlights para o vídeo longo, adiciona contexto antes/depois, limita duração total e mantém ordem cronológica.
+
+### `src/learning/`
+
+`src/learning/__init__.py`
+: Marca o módulo de aprendizado como pacote.
+
+`src/learning/feedback_schema.py`
+: Define schemas Pydantic para feedback, correções, memória e perfil de aprendizado.
+
+`src/learning/feedback_collector.py`
+: Registra feedback local em `cache/learning/feedback.json` e pode alimentar correções futuras.
+
+`src/learning/correction_memory.py`
+: Carrega, salva e inicializa `corrections.json`, `learning_profile.json` e arquivos base de aprendizado.
+
+`src/learning/learning_rules.py`
+: Centraliza regras para atualizar o perfil de aprendizado a partir de feedback.
+
+`src/learning/learning_applier.py`
+: Aplica a memória de correções no texto transcrito.
+
+### `src/analytics/`
+
+`src/analytics/__init__.py`
+: Marca o módulo de analytics como pacote.
+
+`src/analytics/video_metrics_schema.py`
+: Define schemas Pydantic para métricas de vídeos, relatórios e padrões de performance.
+
+`src/analytics/metrics_collector.py`
+: Importa `data/analytics/manual_video_metrics.csv`, cruza com o plano de edição e salva `video_metrics.json`.
+
+`src/analytics/performance_analyzer.py`
+: Analisa métricas reais e gera `performance_report.json` e `learned_patterns.json`.
+
+`src/analytics/learning_from_metrics.py`
+: Aplica os padrões aprendidos no `cache/learning/learning_profile.json`.
 
 ### `src/effects/`
 

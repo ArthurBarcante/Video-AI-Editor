@@ -2,6 +2,7 @@ from pathlib import Path
 
 from src.editing import shorts_builder
 from src.editing.shorts_builder import render_short, render_shorts_from_edit_plan
+from src.utils.cache_metadata import save_cache_metadata
 from src.utils.file_utils import save_json
 
 
@@ -42,6 +43,10 @@ def test_render_short_builds_expected_ffmpeg_command(
             "15.0",
             "-c:v",
             "libx264",
+            "-preset",
+            "veryfast",
+            "-crf",
+            "28",
             "-c:a",
             "aac",
             "-movflags",
@@ -125,6 +130,7 @@ def test_render_shorts_from_edit_plan_uses_cache_without_force(
         },
         edit_plan_path,
     )
+    save_cache_metadata(existing_short, [edit_plan_path, "input/live_bruta.mp4"])
 
     monkeypatch.setattr(shorts_builder, "OUTPUT_SHORTS_DIR", output_dir)
     monkeypatch.setattr(shorts_builder, "run_command", lambda command: calls.append(command))
@@ -134,3 +140,19 @@ def test_render_shorts_from_edit_plan_uses_cache_without_force(
     assert rendered == [existing_short]
     assert existing_short.read_bytes() == b"cached"
     assert calls == []
+
+
+def test_render_shorts_from_edit_plan_returns_empty_when_no_shorts(tmp_path: Path) -> None:
+    edit_plan_path = tmp_path / "cache" / "edit_plans" / "edit_plan.json"
+    save_json(
+        {
+            "source_video": "input/live_bruta.mp4",
+            "shorts": [],
+            "long_videos": [],
+        },
+        edit_plan_path,
+    )
+
+    rendered = render_shorts_from_edit_plan(edit_plan_path)
+
+    assert rendered == []
